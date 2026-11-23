@@ -139,9 +139,13 @@ export function vorschlagFuer(uebung, einheiten, readiness = null, vorlagenSaetz
   }
   const v = calc.vorschlag(uebung, einheiten, readiness);
   const hatHistorie = einheiten.some((e) => calc.einheitZusammenfassung(e));
-  if (!hatHistorie && vorlagenSaetze) {
-    v.saetze = vorlagenSaetze;
-    v.wdhZiel = Array(vorlagenSaetze).fill(v.wdhMin);
+  if (vorlagenSaetze) {
+    // Satzzahl = Volumen laut Plan (Hypertrophie-Reiz); Progression nur über Gewicht/Wdh.
+    const n = readiness === 'rot' ? Math.max(1, vorlagenSaetze - 1) : vorlagenSaetze;
+    const z = hatHistorie ? v.wdhZiel.slice(0, n) : [];
+    while (z.length < n) z.push(z.length ? z[z.length - 1] : v.wdhMin);
+    v.saetze = n;
+    v.wdhZiel = z;
   }
   if (ohneGewicht(uebung)) {
     v.gewicht = 0;
@@ -196,9 +200,13 @@ export async function letzteKrafteinheiten(db, n = 5, ausserId = null) {
   return alle.sort((a, b) => trainingZeit(b) - trainingZeit(a)).slice(0, n);
 }
 
-export async function startTraining(db, vorlageKey, vorlagen = {}, jetzt = new Date()) {
+/** saetzeAbzug: z. B. 1 in Kurwoche 1 (Einstieg nach Pause, Muskelkater begrenzen); nie unter 2 Sätze */
+export async function startTraining(db, vorlageKey, vorlagen = {}, jetzt = new Date(), saetzeAbzug = 0) {
   const v = vorlagen[vorlageKey];
-  const plan = (v?.uebungen || []).map((p) => ({ uebung_id: p.id, saetze: p.saetze ?? null }));
+  const plan = (v?.uebungen || []).map((p) => ({
+    uebung_id: p.id,
+    saetze: p.saetze == null ? null : p.saetze >= 3 ? Math.max(2, p.saetze - saetzeAbzug) : p.saetze,
+  }));
   const row = {
     id: db.neueId('tr'), datum: calc.isoDatum(jetzt), start: jetzt.toISOString(), art: 'kraft',
     titel: v?.name || 'Freies Training', vorlage: v ? vorlageKey : 'frei', quelle: 'app', extra: { plan },

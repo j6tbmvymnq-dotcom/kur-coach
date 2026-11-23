@@ -56,13 +56,17 @@ function zeitleiste(d, starts) {
 }
 
 function planZeilen(d) {
-  const plan = calc.proteinPlan(d.messung);
+  const plan = calc.proteinPlan(d.messung, d.profil);
   const z = [];
   if (plan) {
     const n = plan.mahlzeiten.filter((m) => m.g === plan.portion).length;
     z.push(`Protein-Plan: ${n} \u00d7 ~${plan.portion} g + ${calc.EVIDENZ.proteinVorSchlafG[1]} g vor dem Schlafen`);
   }
-  if (d.ziele.defizit != null) z.push(`Defizit heute: ${zf(d.ziele.defizit)} kcal (${String(calc.EVIDENZ.abnahmeProzentWoche).replace('.', ',')} %/Woche)`);
+  if (d.ziele.defizit != null) {
+    const M = calc.ZIEL_MODI[d.ziele.modus];
+    const art = d.ziele.defizit < 0 ? 'Überschuss' : 'Defizit';
+    z.push(`${M.name} – ${art} heute: ${zf(Math.abs(d.ziele.defizit))} kcal (${String(Math.abs(M.rate)).replace('.', ',')} %/Woche)`);
+  }
   return z.length ? h('div', { class: 'plan-zeilen muted' }, z.map((t) => h('p', null, t))) : null;
 }
 

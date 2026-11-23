@@ -153,14 +153,24 @@ export const EVIDENZ = {
   fettMinGkg: 0.7, fettMinAnteil: 0.20,
   kcalProKgFett: 7700,
   kreatinG: 5,                  // 3–5 g/Tag Monohydrat, Zeitpunkt egal (ISSN Kreider 2017)
+  maxUeberschussAnteil: 0.10,   // Lean Bulk: max. +10 % über Umsatz (Iraki 2019)
 };
 
+// Ziel-Modi. rate = Gewichtsänderung in % Körpergewicht pro Woche (positiv = Abnahme).
+export const ZIEL_MODI = {
+  fettabbau:     { name: 'Fettabbau', rate: 0.8, proteinGproKgFFM: 2.6, schritte: [15000, 20000] },
+  rekomposition: { name: 'Rekomposition', rate: 0.25, proteinGproKgFFM: 2.6, schritte: [10000, 12000] },
+  aufbau:        { name: 'Aufbau', rate: -0.25, proteinGproKgFFM: 2.2, schritte: [8000, 10000] },
+};
+export const STANDARD_MODUS = 'rekomposition';
+export const modus = (profil) => ZIEL_MODI[profil?.einstellungen?.ziel_modus] ? profil.einstellungen.ziel_modus : STANDARD_MODUS;
+
 /** Protein-Tagesziel in g: über fettfreie Masse, sonst Körpergewicht; begrenzt auf 1,6–2,4 g/kg */
-export function proteinZiel(messung) {
+export function proteinZiel(messung, faktorFFM = EVIDENZ.proteinGproKgFFM) {
   const g = messung?.gewicht;
   if (!g) return null;
   const ffm = fettfreieMasse(messung);
-  const roh = ffm ? ffm * EVIDENZ.proteinGproKgFFM : g * EVIDENZ.proteinGproKgOhneFFM;
+  const roh = ffm ? ffm * faktorFFM : g * EVIDENZ.proteinGproKgOhneFFM;
   const [lo, hi] = EVIDENZ.proteinGrenzenGkg;
   return runde(Math.min(hi * g, Math.max(lo * g, roh)));
 }
@@ -172,35 +182,41 @@ export function defizitKcal(gewicht, readiness = null, rate = EVIDENZ.abnahmePro
   return runde((gewicht * (r / 100) * EVIDENZ.kcalProKgFett) / 7);
 }
 
-/** kcal-Ziel = Umsatz − Defizit, Defizit max. 30 % des Umsatzes, nie unter Grundumsatz */
-export function kcalZielEvidenz(umsatz, bmr, gewicht, readiness = null) {
+/**
+ * kcal-Ziel = Umsatz − Defizit. Defizit max. 30 % des Umsatzes, nie unter Grundumsatz.
+ * Negative Rate (Aufbau) = Überschuss, max. +10 % des Umsatzes.
+ */
+export function kcalZielEvidenz(umsatz, bmr, gewicht, readiness = null, rate = EVIDENZ.abnahmeProzentWoche) {
   if (!umsatz) return null;
-  const d = Math.min(defizitKcal(gewicht, readiness) ?? 0, umsatz * EVIDENZ.maxDefizitAnteil);
+  const roh = defizitKcal(gewicht, readiness, rate) ?? 0;
+  const d = roh >= 0
+    ? Math.min(roh, umsatz * EVIDENZ.maxDefizitAnteil)
+    : Math.max(roh, -umsatz * EVIDENZ.maxUeberschussAnteil);
   return runde(Math.max(bmr ?? 0, umsatz - d));
 }
 
 /** Makros nach Evidenz: Protein fest, Fett ≥ 0,7 g/kg und ≥ 20 % kcal, Rest KH */
-export function makrosEvidenz(kcal, messung) {
+export function makrosEvidenz(kcal, messung, faktorFFM = EVIDENZ.proteinGproKgFFM) {
   const gewicht = messung?.gewicht;
   if (!kcal || !gewicht) return null;
-  const protein = proteinZiel(messung);
+  const protein = proteinZiel(messung, faktorFFM);
   const fett = runde(Math.max(gewicht * EVIDENZ.fettMinGkg, (kcal * EVIDENZ.fettMinAnteil) / 9));
   const kh = Math.max(0, runde((kcal - protein * 4 - fett * 9) / 4));
   return { protein, fett, kh };
 }
 
 /** Protein-Verteilung: Portionen über den Tag (für Checklisten/Plan) */
-export function proteinPlan(messung) {
-  const ziel = proteinZiel(messung);
+export function proteinPlan(messung, profil = null) {
+  const ziel = proteinZiel(messung, ZIEL_MODI[modus(profil)].proteinGproKgFFM);
   if (!ziel) return null;
-  const portion = runde(messung.gewicht * EVIDENZ.proteinProMahlzeitGkg);
+  // 4 gleiche Portionen (Richtwert ≥ 0,4 g/kg) + Portion vor dem Schlafen; Summe = Tagesziel
   const schlaf = EVIDENZ.proteinVorSchlafG[1];
+  const portion = runde((ziel - schlaf) / 4);
   return {
-    ziel, portion,
+    ziel, portion, richtwert: runde(messung.gewicht * EVIDENZ.proteinProMahlzeitGkg),
     mahlzeiten: [
-      { slot: 'fruehstueck', g: portion }, { slot: 'mittag', g: portion },
-      { slot: 'nachmittag', g: Math.max(0, ziel - 3 * portion - schlaf) },
-      { slot: 'abend', g: portion }, { slot: 'spaetabend', g: schlaf },
+      { slot: 'fruehstueck', g: portion }, { slot: 'mittag', g: portion }, { slot: 'nachmittag', g: portion },
+      { slot: 'abend', g: ziel - schlaf - 3 * portion }, { slot: 'spaetabend', g: schlaf },
     ],
   };
 }
@@ -212,13 +228,15 @@ export function tagesziele({ profil, messung, tag = {}, trainings = [], datum = 
   const um = gesamtumsatz({
     bmr: gu.wert, aktiveKcal: tag.aktive_kcal ?? null, schritte: tag.schritte ?? 0, gewicht, trainings,
   });
-  const kcal = kcalZielEvidenz(um.wert, gu.wert, gewicht, readiness);
+  const m = modus(profil), M = ZIEL_MODI[m];
+  const kcal = kcalZielEvidenz(um.wert, gu.wert, gewicht, readiness, M.rate);
   const trMin = trainings.reduce((s, t) => s + (t.minuten || 0), 0);
   return {
+    modus: m, rate: M.rate,
     grundumsatz: gu, umsatz: um, kcal,
-    defizit: um.wert && kcal ? runde(um.wert - kcal) : null,
-    makros: makrosEvidenz(kcal, messung),
-    schritte: schritteZiel(15000, trMin),
+    defizit: um.wert && kcal ? runde(um.wert - kcal) : null,   // negativ = Überschuss
+    makros: makrosEvidenz(kcal, messung, M.proteinGproKgFFM),
+    schritte: trMin < 45 ? M.schritte[1] : M.schritte[0],
   };
 }
 

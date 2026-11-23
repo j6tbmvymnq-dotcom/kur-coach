@@ -91,10 +91,25 @@ export default function (t) {
   });
   t.gleich(tz.grundumsatz.wert, 1846, 'tagesziele: Grundumsatz 1846');
   t.gleich(tz.umsatz.wert, 2492, 'tagesziele: Umsatz 1846*1,35 = 2492');
-  // Evidenzmodell: Defizit 88*0,8%*7700/7 = 774 -> 2492-774 = 1718 < Grundumsatz -> 1846
-  t.gleich(tz.kcal, 1846, 'tagesziele: kcal nie unter Grundumsatz (1846)');
+  // Standard-Modus Rekomposition: Defizit 88*0,25%*7700/7 = 242 -> 2492-242 = 2250
+  t.gleich(tz.modus, 'rekomposition', 'tagesziele: Standard-Modus Rekomposition');
+  t.gleich(tz.kcal, 2250, 'tagesziele Rekomp: 2492-242 = 2250');
   t.gleich(tz.makros.protein, 177, 'tagesziele: Protein 68 kg FFM * 2,6 = 176,8 -> 177');
-  t.gleich(tz.makros.kh, 145, 'tagesziele: KH (1846-708-558)/4 = 145');
+  t.gleich(tz.makros.kh, 246, 'tagesziele: KH (2250-708-558)/4 = 246');
+  const tzF = C.tagesziele({
+    profil: { geschlecht: 'm', groesse_cm: 182, geburtsjahr: 1992, einstellungen: { ziel_modus: 'fettabbau' } },
+    messung: { gewicht: 88, fettmasse: 20 }, tag: {}, trainings: [], datum: '2026-11-23',
+  });
+  // Fettabbau: 2492-774 = 1718 < Grundumsatz -> 1846
+  t.gleich(tzF.kcal, 1846, 'tagesziele Fettabbau: nie unter Grundumsatz (1846)');
+  t.gleich(tzF.schritte, 20000, 'tagesziele Fettabbau: wenig Training -> 20000');
+  const tzA = C.tagesziele({
+    profil: { geschlecht: 'm', groesse_cm: 182, geburtsjahr: 1992, einstellungen: { ziel_modus: 'aufbau' } },
+    messung: { gewicht: 88, fettmasse: 20 }, tag: {}, trainings: [], datum: '2026-11-23',
+  });
+  t.gleich(tzA.kcal, 2734, 'tagesziele Aufbau: 2492+242 = 2734');
+  t.gleich(tzA.makros.protein, 150, 'tagesziele Aufbau: Protein 68*2,2 = 149,6 -> 150');
+  t.gleich(C.kcalZielEvidenz(2000, 1500, 200, null, -0.25), 2200, 'Überschuss max +10 %');
 
   t.gruppe('Evidenzbasierte Ziele');
   t.gleich(C.defizitKcal(88), 774, 'defizitKcal: 88*0,008*7700/7 = 774,4 -> 774');
@@ -106,7 +121,7 @@ export default function (t) {
   t.gleich(C.proteinZiel({ gewicht: 100, kfa: 5 }), 240, 'proteinZiel: Obergrenze 2,4 g/kg');
   t.gleich(C.makrosEvidenz(2200, { gewicht: 88, fettmasse: 20 }).fett, 62, 'makrosEvidenz: Fett max(61,6; 48,9) -> 62');
   t.gleich(C.proteinPlan({ gewicht: 88.4, kfa: 21.8 }).mahlzeiten.reduce((s, m) => s + m.g, 0), 180, 'proteinPlan: Portionen ergeben Tagesziel');
-  t.gleich(tz.schritte, 20000, 'tagesziele: wenig Training -> 20000 Schritte');
+  t.gleich(tz.schritte, 12000, 'tagesziele Rekomp: wenig Training -> 12000 Schritte');
 
   // ------------------------------------------------------------ Summen, Warnung, Schritte
   t.gruppe('Summen und Warnung');

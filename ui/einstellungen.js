@@ -31,17 +31,30 @@ function zeile(label, wert) {
 async function zieleKarte() {
   const [d, ev] = await Promise.all([ladeTag(), ladeEvidenz()]);
   const z = d.ziele, m = d.messung;
+  const aktiv = calc.modus(d.profil);
+  const modusWahl = h('div', { class: 'chips' }, ...Object.entries(calc.ZIEL_MODI).map(([key, M]) =>
+    h('button', {
+      type: 'button', class: key === aktiv ? 'chip aktiv' : 'chip', 'aria-pressed': String(key === aktiv),
+      onclick: async () => {
+        const p = (await db.get('profil', 'me')) || {};
+        await db.patch('profil', 'me', { einstellungen: { ...(p.einstellungen || {}), ziel_modus: key } });
+        toast(`Ziel: ${M.name}`);
+        window.dispatchEvent(new HashChangeEvent('hashchange'));   // Seite mit neuen Zielen neu aufbauen
+      },
+    }, M.name)));
   let werte;
   if (!m || z.kcal == null || !z.makros) {
     werte = h('p', { class: 'hinweis' }, 'Erst Gewicht eintragen, dann berechnet die App deine Ziele.');
   } else {
-    const plan = calc.proteinPlan(m);
+    const plan = calc.proteinPlan(m, d.profil);
     const n = plan.mahlzeiten.filter((x) => x.g === plan.portion).length;
-    const kgWoche = m.gewicht * calc.EVIDENZ.abnahmeProzentWoche / 100;
+    const rate = z.rate ?? calc.EVIDENZ.abnahmeProzentWoche;
+    const kgWoche = Math.abs(m.gewicht * rate / 100);
+    const ueberschuss = (z.defizit ?? 0) < 0;
     werte = h('div', { class: 'werte' },
       zeile('Kalorienziel', `${zf(z.kcal)} kcal`),
-      zeile('Defizit', `${zf(z.defizit ?? 0)} kcal/Tag`),
-      h('p', { class: 'muted klein-text' }, `${dez(calc.EVIDENZ.abnahmeProzentWoche)} % pro Woche \u2248 ${dez(kgWoche.toFixed(2))} kg/Woche`),
+      zeile(ueberschuss ? '\u00dcberschuss' : 'Defizit', `${zf(Math.abs(z.defizit ?? 0))} kcal/Tag`),
+      h('p', { class: 'muted klein-text' }, `${dez(Math.abs(rate))} % pro Woche \u2248 ${dez(kgWoche.toFixed(2))} kg/Woche ${rate < 0 ? 'Zunahme' : 'Abnahme'}`),
       zeile('Protein', `${zf(z.makros.protein)} g`),
       h('p', { class: 'muted klein-text' }, `${n} \u00d7 ~${plan.portion} g + ${calc.EVIDENZ.proteinVorSchlafG[1]} g vor dem Schlafen`),
       zeile('Fett', `${zf(z.makros.fett)} g`),
@@ -53,7 +66,7 @@ async function zieleKarte() {
     h('p', null, h('strong', null, 'Regel: '), t.regel),
     h('p', null, h('strong', null, 'Warum: '), t.warum),
     quellenListe(t.quellen)));
-  return karte('Ziele & Belege', werte, ...belege);
+  return karte('Ziele & Belege', h('p', { class: 'muted klein-text' }, 'Ziel der Kur'), modusWahl, werte, ...belege);
 }
 
 async function supplementKarte() {

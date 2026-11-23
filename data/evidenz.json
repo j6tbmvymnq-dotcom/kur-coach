@@ -4,18 +4,22 @@
   "ziele": [
     {
       "id": "defizit",
-      "titel": "Kaloriendefizit",
-      "regel": "Abnahme 0,8 % des Körpergewichts pro Woche (≈ Gewicht × 0,008 × 7.700 / 7 kcal pro Tag). Maximal 30 % unter Umsatz, nie unter Grundumsatz. Bei Readiness rot halbe Rate.",
-      "warum": "0,5–1 %/Woche erhält Muskelmasse am besten; schnelleres Abnehmen kostete in Studien mehr Magermasse und Kraft.",
+      "titel": "Energiebilanz & Ziel-Modus",
+      "regel": "Standard: Rekomposition – leichtes Defizit von 0,25 % Körpergewicht pro Woche. Umschaltbar: Fettabbau 0,8 %/Woche (max. 30 % unter Umsatz) oder Aufbau +0,25 %/Woche (max. +10 % über Umsatz). Nie unter Grundumsatz; bei Readiness rot halbe Rate.",
+      "warum": "Nach längerem Training und kurzer Pause (Muskelgedächtnis) kommt Muskulatur schnell zurück – das gelingt auch nahe der Erhaltung, während das Fett langsam sinkt. Bei ~20 % Körperfett ist Rekomposition gut belegt; schnelles Abnehmen kostet Magermasse, ein großer Überschuss bringt vor allem Fett.",
       "quellen": [
-        "Helms ER et al. (2014) J Int Soc Sports Nutr 11:20 – Empfehlungen für natürliche Kraftsportler in der Diät",
-        "Garthe I et al. (2011) Int J Sport Nutr Exerc Metab 21:97–104 – langsame (0,7 %/Wo) vs. schnelle Abnahme"
+        "Barakat C et al. (2020) Strength Cond J 42:7–21 – Body Recomposition",
+        "Bruusgaard JC et al. (2010) PNAS 107:15111–15116 – Myonuklei bleiben nach Detraining erhalten",
+        "Staron RS et al. (1991) J Appl Physiol 70:631–640 – schneller Wiederaufbau nach Pause",
+        "Iraki J et al. (2019) Sports 7:154 – Energiebilanz im Aufbau",
+        "Garthe I et al. (2011) Int J Sport Nutr Exerc Metab 21:97–104",
+        "Helms ER et al. (2014) J Int Soc Sports Nutr 11:20"
       ]
     },
     {
       "id": "protein",
       "titel": "Protein",
-      "regel": "2,6 g pro kg fettfreie Masse (ohne Körperfettwert 2,0 g/kg Körpergewicht), begrenzt auf 1,6–2,4 g/kg Körpergewicht.",
+      "regel": "2,6 g pro kg fettfreie Masse (Aufbau-Modus 2,2 g/kg FFM; ohne Körperfettwert 2,0 g/kg Körpergewicht), begrenzt auf 1,6–2,4 g/kg Körpergewicht.",
       "warum": "Im Defizit mit Krafttraining schützt eine hohe Proteinzufuhr die Muskulatur.",
       "quellen": [
         "Helms ER et al. (2014) Int J Sport Nutr Exerc Metab 24:127–138 – 2,3–3,1 g/kg FFM im Defizit",
@@ -38,63 +42,101 @@
       "titel": "Fett",
       "regel": "Mindestens 0,7 g/kg und mindestens 20 % der Kalorien. Rest der Kalorien als Kohlenhydrate (Leistung im Training).",
       "warum": "Zu wenig Fett über längere Zeit belastet den Hormonhaushalt; Kohlenhydrate halten die Trainingsleistung.",
-      "quellen": ["Helms ER et al. (2014) J Int Soc Sports Nutr 11:20"]
+      "quellen": [
+        "Helms ER et al. (2014) J Int Soc Sports Nutr 11:20"
+      ]
     },
     {
       "id": "training",
-      "titel": "Krafttraining & Progression",
-      "regel": "Double Progression im Wdh.-Bereich 8–12 (Isolation 10–15), 0–3 Wdh. in Reserve. Ziel im Defizit: Kraft halten bis leicht steigern.",
-      "warum": "Krafttraining ist das stärkste Signal, Muskelmasse in der Diät zu erhalten.",
-      "quellen": ["Schoenfeld BJ et al. (2017) J Sports Sci 35:1073–1082 – Volumen und Hypertrophie", "Helms ER et al. (2014) J Int Soc Sports Nutr 11:20"]
+      "titel": "Training für Muskelaufbau & Breite",
+      "regel": "Ober-/Unterkörper im Wechsel, 4×/Woche (jeder Muskel 2×/Woche). 10–20 harte Sätze pro Muskel und Woche, 0–2 Wdh. vor Versagen. Schwerpunkt Breite: Seitheben ~14 Sätze/Woche, Rücken ~15. Kurwoche 1: je Übung 1 Satz weniger (Einstieg nach Pause). Progression über Gewicht/Wdh. (Double Progression 8–12).",
+      "warum": "Volumen und Frequenz sind die stärksten trainierbaren Hebel für Hypertrophie; Schultern und Lat bestimmen die optische Breite.",
+      "quellen": [
+        "Schoenfeld BJ et al. (2017) J Sports Sci 35:1073–1082 – Volumen-Dosis-Wirkung",
+        "Schoenfeld BJ et al. (2016) Sports Med 46:1689–1697 – Trainingsfrequenz",
+        "Refalo MC et al. (2023) Sports Med 53:649–665 – Nähe zum Muskelversagen"
+      ]
     },
     {
       "id": "schlaf",
       "titel": "Schlaf",
       "regel": "Schlaffenster 22:30–06:30, Ziel ≥ 7,5 h im Bett.",
       "warum": "Schlafmangel im Defizit verschiebt den Gewichtsverlust von Fett zu Magermasse.",
-      "quellen": ["Nedeltcheva AV et al. (2010) Ann Intern Med 153:435–441"]
+      "quellen": [
+        "Nedeltcheva AV et al. (2010) Ann Intern Med 153:435–441"
+      ]
     },
     {
       "id": "schritte",
       "titel": "Schritte",
-      "regel": "15.000/Tag, an Tagen mit < 45 min Training 20.000.",
-      "warum": "Programmziel (kein Studienwert): Gehen erhöht den Verbrauch ohne die Regeneration fürs Krafttraining zu stören. Gesundheitsnutzen ist ab ca. 8.000–10.000 Schritten belegt.",
-      "quellen": ["Paluch AE et al. (2022) Lancet Public Health 7:e219–e228 – Schritte und Sterblichkeit"]
+      "regel": "Rekomposition: 10.000/Tag (12.000 an Tagen mit < 45 min Training). Fettabbau 15.000/20.000, Aufbau 8.000/10.000.",
+      "warum": "Programmziel (kein Studienwert): genug Alltagsbewegung für Gesundheit und Fettstoffwechsel, ohne dem Muskelaufbau Energie zu entziehen. Gesundheitsnutzen ist ab ca. 8.000–10.000 Schritten belegt.",
+      "quellen": [
+        "Paluch AE et al. (2022) Lancet Public Health 7:e219–e228 – Schritte und Sterblichkeit"
+      ]
     }
   ],
   "supplements": [
     {
-      "id": "kreatin", "name": "Kreatin-Monohydrat", "status": "hast du", "dosis": "5 g täglich, auch an Ruhetagen",
+      "id": "kreatin",
+      "name": "Kreatin-Monohydrat",
+      "status": "hast du",
+      "dosis": "5 g täglich, auch an Ruhetagen",
       "zeit": "Morgens mit Wasser (Zeitpunkt egal – Hauptsache jeden Tag)",
       "warum": "Mehr Kraft und Trainingsvolumen, unterstützt Muskelerhalt. Kein Laden nötig. Anfangs bis ~1 kg Wasser in den Muskeln – das ist kein Fett (Waage!).",
-      "quellen": ["Kreider RB et al. (2017) J Int Soc Sports Nutr 14:18 – ISSN Position Stand Kreatin"]
+      "quellen": [
+        "Kreider RB et al. (2017) J Int Soc Sports Nutr 14:18 – ISSN Position Stand Kreatin"
+      ]
     },
     {
-      "id": "proteinpulver", "name": "Proteinpulver (Whey)", "status": "hast du", "dosis": "1 Portion (ca. 30 g Protein), wenn das Protein laut Plan fehlt",
+      "id": "proteinpulver",
+      "name": "Proteinpulver (Whey)",
+      "status": "hast du",
+      "dosis": "1 Portion (ca. 30 g Protein), wenn das Protein laut Plan fehlt",
       "zeit": "Nachmittags nach dem Training bzw. als Lückenfüller; abends lieber Magerquark/Skyr",
       "warum": "Praktisch, um das Proteinziel zu erreichen, wenn das Buffet zu wenig hergibt. Kein Muss, wenn die Mahlzeiten reichen.",
-      "quellen": ["Jäger R et al. (2017) J Int Soc Sports Nutr 14:20"]
+      "quellen": [
+        "Jäger R et al. (2017) J Int Soc Sports Nutr 14:20"
+      ]
     },
     {
-      "id": "vitamin_d", "name": "Vitamin D3", "status": "empfohlen", "dosis": "20 µg (800 IE) täglich",
+      "id": "vitamin_d",
+      "name": "Vitamin D3",
+      "status": "empfohlen",
+      "dosis": "20 µg (800 IE) täglich",
       "zeit": "Zum Frühstück (mit etwas Fett)",
       "warum": "Von Oktober bis März bildet die Haut in Deutschland praktisch kein Vitamin D; die DGE nennt 20 µg/Tag, wenn die Eigenbildung fehlt. Am besten beim Aufnahmegespräch den Wert (25-OH-D) bestimmen lassen und die Dosis mit dem Arzt abstimmen.",
-      "quellen": ["Deutsche Gesellschaft für Ernährung – Referenzwert Vitamin D (20 µg/Tag ohne Eigensynthese)"]
+      "quellen": [
+        "Deutsche Gesellschaft für Ernährung – Referenzwert Vitamin D (20 µg/Tag ohne Eigensynthese)"
+      ]
     },
     {
-      "id": "omega3", "name": "Omega-3 (EPA/DHA)", "status": "optional", "dosis": "ca. 1 g EPA+DHA täglich",
+      "id": "omega3",
+      "name": "Omega-3 (EPA/DHA)",
+      "status": "optional",
+      "dosis": "ca. 1 g EPA+DHA täglich",
       "zeit": "Zu einer Mahlzeit",
       "warum": "Nur sinnvoll, wenn du weniger als 1–2× pro Woche fetten Seefisch isst. Mäßige Evidenz; vorher mit dem Kurarzt besprechen.",
-      "quellen": ["Philpott JD et al. (2019) Res Sports Med 27:219–237 – Übersicht Omega-3 im Sport"]
+      "quellen": [
+        "Philpott JD et al. (2019) Res Sports Med 27:219–237 – Übersicht Omega-3 im Sport"
+      ]
     },
     {
-      "id": "koffein", "name": "Koffein (Kaffee)", "status": "optional", "dosis": "3 mg/kg ca. 45–60 min vor dem Krafttraining",
+      "id": "koffein",
+      "name": "Koffein (Kaffee)",
+      "status": "optional",
+      "dosis": "3 mg/kg ca. 45–60 min vor dem Krafttraining",
       "zeit": "Nicht nach 14 Uhr (Schlaf geht vor)",
       "warum": "Gut belegte Leistungssteigerung – aber Schlaf ist in der Kur wichtiger.",
-      "quellen": ["Guest NS et al. (2021) J Int Soc Sports Nutr 18:1 – ISSN Position Stand Koffein"]
+      "quellen": [
+        "Guest NS et al. (2021) J Int Soc Sports Nutr 18:1 – ISSN Position Stand Koffein"
+      ]
     },
     {
-      "id": "elektrolyte", "name": "Salz/Elektrolyte", "status": "an Saunatagen", "dosis": "Wasser + eine Prise Salz bzw. salzige Brühe nach der Sauna",
+      "id": "elektrolyte",
+      "name": "Salz/Elektrolyte",
+      "status": "an Saunatagen",
+      "dosis": "Wasser + eine Prise Salz bzw. salzige Brühe nach der Sauna",
       "zeit": "Zwischen und nach den Saunagängen",
       "warum": "Ausgleich von Schweißverlusten; kein Präparat nötig.",
       "quellen": []

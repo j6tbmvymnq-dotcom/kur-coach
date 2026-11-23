@@ -1,6 +1,7 @@
 // Studio (Gym-Logger, M2): Startscreen, Bestwerte; Training in studio-sess.js, Zusammenfassung in studio-ende.js
 import * as db from '../db.js';
 import * as gym from '../gym.js';
+import * as calc from '../calc.js';
 import { icon } from './icons.js';
 import { h, zf1, toast, fehlerText } from './util.js';
 import { zeigeSession } from './studio-sess.js';
@@ -57,7 +58,11 @@ async function zeigeStart(S) {
   const { db: d } = S;
   const start = async (key) => {
     try {
-      const t = await gym.startTraining(d, key, S.vorlagen);
+      // Kurwoche 1: ein Satz weniger je Übung (Wiedereinstieg nach Pause)
+      const profil = await d.get('profil', 'me');
+      const kt = calc.kurTag(profil?.kur_start, calc.isoDatum(), profil?.kur_tage ?? 21);
+      const abzug = kt.status === 'laeuft' && kt.tag <= 7 ? 1 : 0;
+      const t = await gym.startTraining(d, key, S.vorlagen, new Date(), abzug);
       await zeigeSession(S, t);
     } catch (e) { toast('Start fehlgeschlagen: ' + fehlerText(e)); }
   };
@@ -66,9 +71,15 @@ async function zeigeStart(S) {
   const hist = await gym.historieAlle(d);
   const best = gym.bestwerteListe(hist, S.katalog);
 
-  const vorlagenKnoepfe = Object.entries(S.vorlagen).map(([key, v]) =>
-    h('button', { type: 'button', class: 'btn primaer gross', onclick: () => start(key) },
-      h('span', { html: icon('play', 22) }), ` ${v.name}`));
+  // Nächste Vorlage = die nach der zuletzt trainierten (Rotation)
+  const keys = Object.keys(S.vorlagen);
+  const zuletzt = letzte.find((t) => keys.includes(t.vorlage))?.vorlage;
+  const naechste = zuletzt ? keys[(keys.indexOf(zuletzt) + 1) % keys.length] : keys[0];
+  const vorlagenKnoepfe = keys.map((key) => {
+    const v = S.vorlagen[key];
+    return h('button', { type: 'button', class: key === naechste ? 'btn primaer gross' : 'btn gross', onclick: () => start(key) },
+      h('span', { html: icon('play', 22) }), ` ${v.name}${key === naechste ? ' – als Nächstes' : ''}`);
+  });
 
   const seite = h('div', { class: 'spalte' },
     h('h1', { class: 'titel gross' }, 'Studio'),
