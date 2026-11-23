@@ -1,0 +1,57 @@
+{
+  "uebungen": [
+    {"id":"beinpresse","name":"Beinpresse","kategorie":"beine","typ":"grund","geraet":"Maschine","schrittweite_kg":5,"wdh_min":8,"wdh_max":12,"alternativen":["hackenschmidt-kniebeuge","multipresse-kniebeuge","beinstrecker"]},
+    {"id":"hackenschmidt-kniebeuge","name":"Hackenschmidt-Kniebeuge","kategorie":"beine","typ":"grund","geraet":"Maschine","schrittweite_kg":5,"wdh_min":8,"wdh_max":12,"alternativen":["beinpresse","multipresse-kniebeuge","ausfallschritte-kh"]},
+    {"id":"multipresse-kniebeuge","name":"Multipresse-Kniebeuge","kategorie":"beine","typ":"grund","geraet":"Maschine","schrittweite_kg":5,"wdh_min":8,"wdh_max":12,"alternativen":["hackenschmidt-kniebeuge","beinpresse","ausfallschritte-kh"]},
+    {"id":"ausfallschritte-kh","name":"Ausfallschritte (KH)","kategorie":"beine","typ":"grund","geraet":"Kurzhantel","schrittweite_kg":2,"wdh_min":8,"wdh_max":12,"alternativen":["hackenschmidt-kniebeuge","multipresse-kniebeuge","beinpresse"]},
+    {"id":"beinstrecker","name":"Beinstrecker","kategorie":"beine","typ":"isolation","geraet":"Maschine","schrittweite_kg":5,"wdh_min":10,"wdh_max":15,"alternativen":["beinbeuger-liegend","beinbeuger-sitzend","beinpresse"]},
+    {"id":"beinbeuger-liegend","name":"Beinbeuger liegend","kategorie":"beine","typ":"isolation","geraet":"Maschine","schrittweite_kg":5,"wdh_min":10,"wdh_max":15,"alternativen":["beinbeuger-sitzend","beinstrecker","rumaenisches-kreuzheben-kh"]},
+    {"id":"beinbeuger-sitzend","name":"Beinbeuger sitzend","kategorie":"beine","typ":"isolation","geraet":"Maschine","schrittweite_kg":5,"wdh_min":10,"wdh_max":15,"alternativen":["beinbeuger-liegend","beinstrecker","rumaenisches-kreuzheben-kh"]},
+    {"id":"rumaenisches-kreuzheben-kh","name":"Rumänisches Kreuzheben (KH)","kategorie":"beine","typ":"grund","geraet":"Kurzhantel","schrittweite_kg":2,"wdh_min":8,"wdh_max":12,"alternativen":["beinbeuger-liegend","beinbeuger-sitzend","ausfallschritte-kh"]},
+    {"id":"hyperextension","name":"Hyperextension","kategorie":"ruecken","typ":"grund","geraet":"Körpergewicht","schrittweite_kg":0,"wdh_min":8,"wdh_max":12,"alternativen":["rudern-sitzend-kabel","latzug"]},
+    {"id":"brustpresse-maschine","name":"Brustpresse (Maschine)","kategorie":"brust","typ":"grund","geraet":"Maschine","schrittweite_kg":5,"wdh_min":8,"wdh_max":12,"alternativen":["butterfly","bankdruecken-kh","schraegbankdruecken-kh"]},
+    {"id":"bankdruecken-lh","name":"Bankdrücken (LH)","kategorie":"brust","typ":"grund","geraet":"Langhantel","schrittweite_kg":2.5,"wdh_min":8,"wdh_max":12,"alternativen":["bankdruecken-kh","schraegbankdruecken-kh","brustpresse-maschine"]},
+    {"id":"bankdruecken-kh","name":"Bankdrücken (KH)","kategorie":"brust","typ":"grund","geraet":"Kurzhantel","schrittweite_kg":2,"wdh_min":8,"wdh_max":12,"alternativen":["bankdruecken-lh","schraegbankdruecken-kh","brustpresse-maschine"]},
+    {"id":"schraegbankdruecken-kh","name":"Schrägbankdrücken (KH)","kategorie":"brust","typ":"grund","geraet":"Kurzhantel","schrittweite_kg":2,"wdh_min":8,"wdh_max":12,"alternativen":["bankdruecken-kh","bankdruecken-lh","brustpresse-maschine"]},
+    {"id":"butterfly","name":"Butterfly","kategorie":"brust","typ":"isolation","geraet":"Maschine","schrittweite_kg":5,"wdh_min":10,"wdh_max":15,"alternativen":["brustpresse-maschine","schraegbankdruecken-kh"]},
+    {"id":"schulterpresse-maschine","name":"Schulterpresse (Maschine)","kategorie":"schulter","typ":"grund","geraet":"Maschine","schrittweite_kg":5,"wdh_min":8,"wdh_max":12,"alternativen":["seitheben-kh","face-pulls"]},
+    {"id":"seitheben-kh","name":"Seitheben (KH)","kategorie":"schulter","typ":"isolation","geraet":"Kurzhantel","schrittweite_kg":2,"wdh_min":10,"wdh_max":15,"alternativen":["face-pulls","schulterpresse-maschine"]},
+    {"id":"latzug","name":"Latzug","kategorie":"ruecken","typ":"grund","geraet":"Kabel","schrittweite_kg":2.5,"wdh_min":8,"wdh_max":12,"alternativen":["klimmzug-assistiert","rudern-sitzend-kabel","iso-lateral-row"]},
+    {"id":"klimmzug-assistiert","name":"Klimmzug assistiert","kategorie":"ruecken","typ":"grund","geraet":"Maschine","schrittweite_kg":5,"wdh_min":8,"wdh_max":12,"alternativen":["latzug","iso-lateral-row"]},
+    {"id":"rudern-sitzend-kabel","name":"Rudern sitzend (Kabel)","kategorie":"ruecken","typ":"grund","geraet":"Kabel","schrittweite_kg":2.5,"wdh_min":8,"wdh_max":12,"alternativen":["iso-lateral-row","latzug","hyperextension"]},
+    {"id":"iso-lateral-row","name":"Iso-Lateral Row (Hammer Strength)","kategorie":"ruecken","typ":"grund","geraet":"Maschine","schrittweite_kg":5,"wdh_min":8,"wdh_max":12,"alternativen":["rudern-sitzend-kabel","latzug","klimmzug-assistiert"]},
+    {"id":"face-pulls","name":"Face Pulls","kategorie":"schulter","typ":"isolation","geraet":"Kabel","schrittweite_kg":2.5,"wdh_min":10,"wdh_max":15,"alternativen":["seitheben-kh","schulterpresse-maschine"]},
+    {"id":"bizeps-kabel","name":"Bizeps Kabel","kategorie":"arme","typ":"isolation","geraet":"Kabel","schrittweite_kg":2.5,"wdh_min":10,"wdh_max":15,"alternativen":["trizeps-kabel"]},
+    {"id":"trizeps-kabel","name":"Trizeps Kabel","kategorie":"arme","typ":"isolation","geraet":"Kabel","schrittweite_kg":2.5,"wdh_min":10,"wdh_max":15,"alternativen":["bizeps-kabel"]},
+    {"id":"plank","name":"Plank","kategorie":"rumpf","typ":"isolation","geraet":"Körpergewicht","schrittweite_kg":0,"wdh_min":30,"wdh_max":60,"einheit":"s","alternativen":["cable-crunch"]},
+    {"id":"cable-crunch","name":"Cable Crunch","kategorie":"rumpf","typ":"isolation","geraet":"Kabel","schrittweite_kg":2.5,"wdh_min":10,"wdh_max":15,"alternativen":["plank"]},
+    {"id":"ergometer","name":"Ergometer","kategorie":"cardio","typ":"cardio","geraet":"Ergometer","schrittweite_kg":0,"wdh_min":0,"wdh_max":0,"einheit":"min","alternativen":["crosstrainer","laufband-gehen-steigung","rudergeraet"]},
+    {"id":"crosstrainer","name":"Crosstrainer","kategorie":"cardio","typ":"cardio","geraet":"Crosstrainer","schrittweite_kg":0,"wdh_min":0,"wdh_max":0,"einheit":"min","alternativen":["ergometer","rudergeraet","laufband-gehen-steigung"]},
+    {"id":"laufband-gehen-steigung","name":"Laufband Gehen mit Steigung","kategorie":"cardio","typ":"cardio","geraet":"Laufband","schrittweite_kg":0,"wdh_min":0,"wdh_max":0,"einheit":"min","alternativen":["ergometer","crosstrainer","rudergeraet"]},
+    {"id":"rudergeraet","name":"Rudergerät","kategorie":"cardio","typ":"cardio","geraet":"Rudergerät","schrittweite_kg":0,"wdh_min":0,"wdh_max":0,"einheit":"min","alternativen":["ergometer","crosstrainer","laufband-gehen-steigung"]}
+  ],
+  "vorlagen": {
+    "kraft-a": {
+      "name": "Kraft A",
+      "uebungen": [
+        {"id":"beinpresse","saetze":3},
+        {"id":"brustpresse-maschine","saetze":3},
+        {"id":"latzug","saetze":3},
+        {"id":"beinbeuger-sitzend","saetze":3},
+        {"id":"seitheben-kh","saetze":3},
+        {"id":"plank","saetze":2}
+      ]
+    },
+    "kraft-b": {
+      "name": "Kraft B",
+      "uebungen": [
+        {"id":"rumaenisches-kreuzheben-kh","saetze":3},
+        {"id":"schraegbankdruecken-kh","saetze":3},
+        {"id":"iso-lateral-row","saetze":3},
+        {"id":"beinstrecker","saetze":3},
+        {"id":"face-pulls","saetze":3},
+        {"id":"cable-crunch","saetze":3}
+      ]
+    }
+  }
+}

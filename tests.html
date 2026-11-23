@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kur-Coach Tests</title>
+<style>
+:root{
+  --bg:#0f1115; --karte:#181c24; --text:#e8eaf0; --dim:#8b93a7; --rand:#2a303c;
+  --gut:#3ccf7c; --gut-bg:#12301f; --schlecht:#ff5d5d; --schlecht-bg:#3a1717;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:16px}
+main{max-width:860px;margin:0 auto}
+h1{font-size:20px;margin:0 0 12px;color:var(--dim);font-weight:600}
+#summe{font-size:28px;font-weight:700;border-radius:12px;padding:18px 20px;margin-bottom:16px;border:1px solid var(--rand)}
+#summe.gut{background:var(--gut-bg);color:var(--gut);border-color:var(--gut)}
+#summe.schlecht{background:var(--schlecht-bg);color:var(--schlecht);border-color:var(--schlecht)}
+#summe.laeuft{background:var(--karte);color:var(--dim)}
+section{background:var(--karte);border:1px solid var(--rand);border-radius:12px;padding:14px 16px;margin-bottom:14px}
+h2{font-size:16px;margin:0 0 10px;color:var(--text)}
+.fehler{color:var(--schlecht)}
+.gruppe{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rand)}
+.gruppe:last-child{border-bottom:0}
+.zaehl{color:var(--dim);white-space:nowrap}
+.zaehl.gut{color:var(--gut)}
+.zaehl.schlecht{color:var(--schlecht)}
+.eintrag{padding:10px 0;border-bottom:1px solid var(--rand)}
+.eintrag:last-child{border-bottom:0}
+.eintrag .beschr{color:var(--text);font-weight:600;overflow-wrap:anywhere}
+.eintrag .wert{font:13px/1.5 ui-monospace,Consolas,monospace;color:var(--dim);white-space:pre-wrap;overflow-wrap:anywhere;margin-top:4px}
+.eintrag .wert b{color:var(--schlecht);font-weight:600}
+.datei{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--rand);overflow-wrap:anywhere}
+.datei:last-child{border-bottom:0}
+.leer{color:var(--dim)}
+.tag{font-size:13px;padding:2px 8px;border-radius:999px;border:1px solid var(--rand);color:var(--dim);white-space:nowrap}
+.tag.schlecht{color:var(--schlecht);border-color:var(--schlecht)}
+.tag.gut{color:var(--gut);border-color:var(--gut)}
+</style>
+</head>
+<body>
+<main>
+  <h1>Kur-Coach – Modultests</h1>
+  <div id="summe" class="laeuft">Tests laufen …</div>
+
+  <section>
+    <h2>Module</h2>
+    <div id="dateien"></div>
+  </section>
+
+  <section>
+    <h2>Gruppen</h2>
+    <div id="gruppen"></div>
+  </section>
+
+  <section>
+    <h2>Fehlschläge</h2>
+    <div id="fehlschlaege"></div>
+  </section>
+</main>
+
+<script type="module">
+const DATEIEN = ['./tests/calc.test.js', './tests/kurlog.test.js'];
+
+const ergebnisse = [];          // {gruppe, beschr, ok, ist, soll}
+const dateiStatus = [];         // {pfad, ok, anzahl, meldung}
+let aktuelleGruppe = '–';
+let aktuellerPfad = '–';
+
+const fmt = (v) => {
+  if (v === undefined) return 'undefined';
+  try { return JSON.stringify(v) ?? String(v); } catch { return String(v); }
+};
+
+function push(ok, ist, soll, beschr) {
+  ergebnisse.push({ gruppe: aktuelleGruppe, datei: aktuellerPfad, beschr: String(beschr ?? ''), ok: !!ok, ist, soll });
+}
+
+// Test-Objekt für die Module
+const t = {
+  gruppe(name) { aktuelleGruppe = String(name); },
+  gleich(ist, soll, beschr = '') {
+    const ok = fmt(ist) === fmt(soll);
+    push(ok, ist, soll, beschr);
+    return ok;
+  },
+  nahe(ist, soll, toleranz, beschr = '') {
+    const ok = typeof ist === 'number' && typeof soll === 'number' && Math.abs(ist - soll) <= toleranz;
+    push(ok, ist, soll, `${beschr}${beschr ? ' ' : ''}(±${toleranz})`);
+    return ok;
+  },
+  wahr(bedingung, beschr = '') {
+    push(!!bedingung, !!bedingung, true, beschr);
+    return !!bedingung;
+  },
+};
+
+// Module laden und ausführen; fehlende Dateien stoppen den Lauf nicht
+for (const pfad of DATEIEN) {
+  aktuellerPfad = pfad;
+  aktuelleGruppe = '–';
+  let mod;
+  try {
+    mod = await import(pfad);
+  } catch (e) {
+    dateiStatus.push({ pfad, ok: false, anzahl: 0, meldung: 'nicht gefunden', detail: e && e.message ? e.message : String(e) });
+    continue;
+  }
+  if (typeof mod.default !== 'function') {
+    dateiStatus.push({ pfad, ok: false, anzahl: 0, meldung: 'kein Standard-Export', detail: '' });
+    continue;
+  }
+  const vorher = ergebnisse.length;
+  try {
+    await mod.default(t);
+    dateiStatus.push({ pfad, ok: true, anzahl: ergebnisse.length - vorher, meldung: 'geladen', detail: '' });
+  } catch (e) {
+    push(false, e && e.message ? e.message : String(e), '(keine Ausnahme)', 'Ausnahme beim Ausführen');
+    dateiStatus.push({ pfad, ok: false, anzahl: ergebnisse.length - vorher, meldung: 'Ausnahme', detail: e && e.message ? e.message : String(e) });
+  }
+}
+
+// Auswertung
+const bestanden = ergebnisse.filter((e) => e.ok).length;
+const gesamt = ergebnisse.length;
+const fehlerListe = ergebnisse.filter((e) => !e.ok);
+const ladeFehler = dateiStatus.filter((d) => !d.ok);
+
+window.TEST_ERGEBNIS = {
+  bestanden,
+  gesamt,
+  fehler: [
+    ...fehlerListe.map((e) => ({ gruppe: e.gruppe, beschr: e.beschr, ist: e.ist, soll: e.soll })),
+    ...ladeFehler.map((d) => ({ gruppe: 'Laden', beschr: `${d.pfad}: ${d.meldung}`, ist: null, soll: null })),
+  ],
+};
+
+// Anzeige
+const el = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+
+const summe = document.getElementById('summe');
+summe.textContent = `${bestanden} von ${gesamt} bestanden`;
+summe.className = gesamt > 0 && bestanden === gesamt && ladeFehler.length === 0 ? 'gut' : 'schlecht';
+document.title = `${bestanden}/${gesamt} Tests – Kur-Coach`;
+
+const dateiBox = document.getElementById('dateien');
+for (const d of dateiStatus) {
+  const zeile = el('div', 'datei');
+  zeile.append(el('span', '', d.pfad));
+  const rechts = el('span', 'tag ' + (d.ok ? 'gut' : 'schlecht'), d.ok ? `${d.anzahl} Tests` : d.meldung);
+  zeile.append(rechts);
+  if (d.detail) zeile.append(el('div', 'leer', d.detail));
+  dateiBox.append(zeile);
+}
+
+const gruppenBox = document.getElementById('gruppen');
+const gruppen = new Map();
+for (const e of ergebnisse) {
+  const key = `${e.datei}|${e.gruppe}`;
+  if (!gruppen.has(key)) gruppen.set(key, { name: e.gruppe, datei: e.datei, ok: 0, n: 0 });
+  const g = gruppen.get(key);
+  g.n++;
+  if (e.ok) g.ok++;
+}
+if (!gruppen.size) gruppenBox.append(el('div', 'leer', 'Keine Tests ausgeführt.'));
+for (const g of gruppen.values()) {
+  const zeile = el('div', 'gruppe');
+  zeile.append(el('span', '', g.name));
+  const alle = g.ok === g.n;
+  zeile.append(el('span', 'zaehl ' + (alle ? 'gut' : 'schlecht'), `${g.ok} / ${g.n}`));
+  gruppenBox.append(zeile);
+}
+
+const fehlBox = document.getElementById('fehlschlaege');
+if (!fehlerListe.length && !ladeFehler.length) {
+  fehlBox.append(el('div', 'leer', 'Keine Fehlschläge.'));
+}
+for (const e of fehlerListe) {
+  const z = el('div', 'eintrag');
+  z.append(el('div', 'beschr', `${e.gruppe}: ${e.beschr}`));
+  const w = el('div', 'wert');
+  w.append(document.createTextNode('ist:  '), el('b', '', fmt(e.ist)), document.createTextNode('\nsoll: '), el('b', '', fmt(e.soll)));
+  z.append(w);
+  fehlBox.append(z);
+}
+for (const d of ladeFehler) {
+  const z = el('div', 'eintrag');
+  z.append(el('div', 'beschr fehler', `${d.pfad}: ${d.meldung}`));
+  if (d.detail) z.append(el('div', 'wert', d.detail));
+  fehlBox.append(z);
+}
+</script>
+</body>
+</html>
