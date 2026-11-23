@@ -240,3 +240,19 @@ input[type=range] { width: 100%; height: 44px; accent-color: var(--accent); }
 
 /* Platz für die Pausenleiste, damit sie den aktiven Satz nicht verdeckt */
 body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) + var(--sa-bottom) + 96px); }
+
+/* Ziele, Belege, Supplements */
+.plan-zeilen { font-size: 14px; display: flex; flex-direction: column; gap: 2px; }
+.plan-zeilen p { margin: 0; }
+.werte { display: flex; flex-direction: column; gap: 6px; }
+.wert-zeile { display: flex; justify-content: space-between; gap: 12px; }
+.beleg { border-top: 1px solid var(--linie); padding-top: 10px; }
+.beleg summary { cursor: pointer; font-weight: 600; min-height: 32px; }
+.beleg p { margin: 8px 0 0; }
+.quellen { margin: 8px 0 0; padding-left: 18px; font-size: 12px; color: var(--muted); }
+.supp { border-top: 1px solid var(--linie); padding-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+.supp p { margin: 0; }
+.supp-kopf { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.badge { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--card2); color: var(--muted); white-space: nowrap; }
+.badge.ok { background: var(--accent-dunkel); color: var(--accent); }
+.badge.akzent { border: 1px solid var(--accent); color: var(--accent); }

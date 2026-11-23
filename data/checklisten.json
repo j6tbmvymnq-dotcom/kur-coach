@@ -1,47 +1,152 @@
 {
-  "_hinweis": "Startwerte. Die App zeigt pro Slot die Punkte, blendet Erledigtes aus und hängt Punkte aus dem Tagesplan dazu (z. B. 'Moorbad 09:30 – vorher nichts Schweres essen'). Einträge mit 'wenn' nur anzeigen, wenn die Bedingung zutrifft.",
+  "_hinweis": "Startwerte. Die App zeigt pro Slot die Punkte, blendet Erledigtes aus und hängt Punkte aus dem Tagesplan dazu (z. B. 'Moorbad 09:30 – vorher nichts Schweres essen'). Einträge mit 'wenn' nur anzeigen, wenn die Bedingung zutrifft. Platzhalter {protein_portion}, {protein_schlaf}, {kreatin} setzt die App aus calc.proteinPlan/EVIDENZ ein.",
   "morgen": [
-    { "id": "kreatin", "text": "Kreatin 5 g + 500 ml Wasser" },
-    { "id": "toilette_wiegen", "text": "Toilette, dann nüchtern wiegen (barfuß, harter Boden)" },
-    { "id": "werte_eintragen", "text": "Waagenwerte eintragen (Foto vom Display oder manuell)" },
-    { "id": "tagesstart", "text": "Tagesstart kopieren → neuer Claude-Chat im Projekt Kur-Coach" },
-    { "id": "plan_check", "text": "Tagesplan ansehen: Termine, Training, Kurs" },
-    { "id": "morgenrunde", "text": "15–30 min Morgenrunde draußen (Tageslicht)", "wenn": "kein_termin_vor_08:30" }
+    {
+      "id": "kreatin",
+      "text": "Kreatin {kreatin} g + 500 ml Wasser"
+    },
+    {
+      "id": "toilette_wiegen",
+      "text": "Toilette, dann nüchtern wiegen (barfuß, harter Boden)"
+    },
+    {
+      "id": "werte_eintragen",
+      "text": "Waagenwerte eintragen (Foto vom Display oder manuell)"
+    },
+    {
+      "id": "tagesstart",
+      "text": "Tagesstart kopieren → neuer Claude-Chat im Projekt Kur-Coach"
+    },
+    {
+      "id": "plan_check",
+      "text": "Tagesplan ansehen: Termine, Training, Kurs"
+    },
+    {
+      "id": "morgenrunde",
+      "text": "15–30 min Morgenrunde draußen (Tageslicht)",
+      "wenn": "kein_termin_vor_08:30"
+    }
   ],
   "fruehstueck": [
-    { "id": "foto_fruehstueck", "text": "Frühstück fotografieren (von oben, Gabel als Referenz) → Claude" },
-    { "id": "protein_fruehstueck", "text": "Mind. 40 g Protein (Eier, Quark, Skyr, Pute)" }
+    {
+      "id": "foto_fruehstueck",
+      "text": "Frühstück fotografieren (von oben, Gabel als Referenz) → Claude"
+    },
+    {
+      "id": "protein_fruehstueck",
+      "text": "Mind. {protein_portion} g Protein (Eier, Quark, Skyr, Pute)"
+    },
+    {
+      "id": "vitamin_d",
+      "text": "Vitamin D3 20 µg (800 IE) zum Frühstück"
+    }
   ],
   "vormittag": [
-    { "id": "wasser_1l", "text": "1 l Wasser geschafft?" },
-    { "id": "bewegung_vm", "text": "Zwischen den Terminen gehen statt sitzen" }
+    {
+      "id": "wasser_1l",
+      "text": "1 l Wasser geschafft?"
+    },
+    {
+      "id": "bewegung_vm",
+      "text": "Zwischen den Terminen gehen statt sitzen"
+    }
   ],
   "mittag": [
-    { "id": "foto_mittag", "text": "Mittagsjause fotografieren → Claude" },
-    { "id": "schritte_mittag", "text": "Schritte ≥ 8.000? Sonst Spaziergang nach dem Essen", "wenn": "steps<8000" },
-    { "id": "wasser_2l", "text": "2 l Wasser bis 14 Uhr" }
+    {
+      "id": "foto_mittag",
+      "text": "Mittagsjause fotografieren → Claude"
+    },
+    {
+      "id": "protein_mittag",
+      "text": "Ca. {protein_portion} g Protein – Eiweißquelle zuerst auf den Teller"
+    },
+    {
+      "id": "schritte_mittag",
+      "text": "Schritte ≥ 8.000? Sonst Spaziergang nach dem Essen",
+      "wenn": "steps<8000"
+    },
+    {
+      "id": "wasser_2l",
+      "text": "2 l Wasser bis 14 Uhr"
+    }
   ],
   "nachmittag": [
-    { "id": "training_plan", "text": "Training/Kurs laut Plan" },
-    { "id": "protein_snack", "text": "Protein-Snack (Shake/Skyr), wenn das Protein unter Plan liegt", "wenn": "protein_unter_plan" },
-    { "id": "training_loggen", "text": "Training an Claude melden (Art, Dauer, Gewichte)" }
+    {
+      "id": "training_plan",
+      "text": "Training/Kurs laut Plan"
+    },
+    {
+      "id": "protein_snack",
+      "text": "Protein-Shake (ca. 30 g), wenn das Protein unter Plan liegt",
+      "wenn": "protein_unter_plan"
+    },
+    {
+      "id": "training_loggen",
+      "text": "Training an Claude melden (Art, Dauer, Gewichte)"
+    }
   ],
   "abend": [
-    { "id": "foto_dinner", "text": "Dinner fotografieren → Claude (zuerst Salat, Beilage klein)" },
-    { "id": "dessert_regel", "text": "Dessert nur, wenn eingeplant (max. 2–3×/Woche)" },
-    { "id": "abendrunde", "text": "30–60 min Abendrunde (Stirnlampe)", "wenn": "steps<15000" }
+    {
+      "id": "foto_dinner",
+      "text": "Dinner fotografieren → Claude (zuerst Salat, Beilage klein)"
+    },
+    {
+      "id": "protein_abend",
+      "text": "Ca. {protein_portion} g Protein zum Abendessen"
+    },
+    {
+      "id": "dessert_regel",
+      "text": "Dessert nur, wenn eingeplant (max. 2–3×/Woche)"
+    },
+    {
+      "id": "abendrunde",
+      "text": "30–60 min Abendrunde (Stirnlampe)",
+      "wenn": "steps<15000"
+    }
   ],
   "spaetabend": [
-    { "id": "sauna", "text": "Sauna 2–3 Gänge, dazwischen trinken + Elektrolyte", "wenn": "keine_aerztliche_sperre" },
-    { "id": "wasser_3l", "text": "3 l Wasser gesamt" },
-    { "id": "schritte_final", "text": "Schritte-Ziel erreicht?" }
+    {
+      "id": "sauna",
+      "text": "Sauna 2–3 Gänge, dazwischen trinken + Elektrolyte",
+      "wenn": "keine_aerztliche_sperre"
+    },
+    {
+      "id": "wasser_3l",
+      "text": "3 l Wasser gesamt"
+    },
+    {
+      "id": "protein_schlaf",
+      "text": "{protein_schlaf} g Protein vor dem Schlafen (Magerquark/Skyr)"
+    },
+    {
+      "id": "schritte_final",
+      "text": "Schritte-Ziel erreicht?"
+    }
   ],
   "abschluss": [
-    { "id": "claude_abschluss", "text": "„Abschluss“ an Claude senden" },
-    { "id": "kurlog_import", "text": "KURLOG in die App einfügen" },
-    { "id": "tagesbewertung", "text": "Schlaf, Stimmung, Energie, Hunger (1–5) eintragen" },
-    { "id": "backup", "text": "Backup in Dateien sichern" },
-    { "id": "kein_alkohol", "text": "Heute kein Alkohol ✓" },
-    { "id": "schlafen", "text": "Handy weg, Licht aus bis 22:30" }
+    {
+      "id": "claude_abschluss",
+      "text": "„Abschluss“ an Claude senden"
+    },
+    {
+      "id": "kurlog_import",
+      "text": "KURLOG in die App einfügen"
+    },
+    {
+      "id": "tagesbewertung",
+      "text": "Schlaf, Stimmung, Energie, Hunger (1–5) eintragen"
+    },
+    {
+      "id": "backup",
+      "text": "Backup in Dateien sichern"
+    },
+    {
+      "id": "kein_alkohol",
+      "text": "Heute kein Alkohol ✓"
+    },
+    {
+      "id": "schlafen",
+      "text": "Handy weg, Licht aus bis 22:30"
+    }
   ]
 }

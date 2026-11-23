@@ -1,0 +1,104 @@
+{
+  "stand": "2026-11-23",
+  "hinweis": "Ziele werden automatisch aus deinen Messwerten berechnet. Keine Diagnose – ärztliche Vorgaben der Klinik haben Vorrang. Alle Supplements dem Kurarzt nennen (Wechselwirkungen mit Medikamenten).",
+  "ziele": [
+    {
+      "id": "defizit",
+      "titel": "Kaloriendefizit",
+      "regel": "Abnahme 0,8 % des Körpergewichts pro Woche (≈ Gewicht × 0,008 × 7.700 / 7 kcal pro Tag). Maximal 30 % unter Umsatz, nie unter Grundumsatz. Bei Readiness rot halbe Rate.",
+      "warum": "0,5–1 %/Woche erhält Muskelmasse am besten; schnelleres Abnehmen kostete in Studien mehr Magermasse und Kraft.",
+      "quellen": [
+        "Helms ER et al. (2014) J Int Soc Sports Nutr 11:20 – Empfehlungen für natürliche Kraftsportler in der Diät",
+        "Garthe I et al. (2011) Int J Sport Nutr Exerc Metab 21:97–104 – langsame (0,7 %/Wo) vs. schnelle Abnahme"
+      ]
+    },
+    {
+      "id": "protein",
+      "titel": "Protein",
+      "regel": "2,6 g pro kg fettfreie Masse (ohne Körperfettwert 2,0 g/kg Körpergewicht), begrenzt auf 1,6–2,4 g/kg Körpergewicht.",
+      "warum": "Im Defizit mit Krafttraining schützt eine hohe Proteinzufuhr die Muskulatur.",
+      "quellen": [
+        "Helms ER et al. (2014) Int J Sport Nutr Exerc Metab 24:127–138 – 2,3–3,1 g/kg FFM im Defizit",
+        "Jäger R et al. (2017) J Int Soc Sports Nutr 14:20 – ISSN Position Stand Protein",
+        "Morton RW et al. (2018) Br J Sports Med 52:376–384 – Meta-Analyse Protein und Krafttraining"
+      ]
+    },
+    {
+      "id": "verteilung",
+      "titel": "Protein-Verteilung",
+      "regel": "4 Portionen à ca. 0,4 g/kg über den Tag + 30–40 g vor dem Schlafen (Magerquark, Skyr oder Kasein-Shake).",
+      "warum": "Gleichmäßig verteilte Portionen maximieren die Muskelproteinsynthese; Protein vor dem Schlaf unterstützt die nächtliche Erholung.",
+      "quellen": [
+        "Schoenfeld BJ, Aragon AA (2018) J Int Soc Sports Nutr 15:10 – Protein pro Mahlzeit",
+        "Snijders T et al. (2019) Front Nutr 6:17 – Protein vor dem Schlafen"
+      ]
+    },
+    {
+      "id": "fett",
+      "titel": "Fett",
+      "regel": "Mindestens 0,7 g/kg und mindestens 20 % der Kalorien. Rest der Kalorien als Kohlenhydrate (Leistung im Training).",
+      "warum": "Zu wenig Fett über längere Zeit belastet den Hormonhaushalt; Kohlenhydrate halten die Trainingsleistung.",
+      "quellen": ["Helms ER et al. (2014) J Int Soc Sports Nutr 11:20"]
+    },
+    {
+      "id": "training",
+      "titel": "Krafttraining & Progression",
+      "regel": "Double Progression im Wdh.-Bereich 8–12 (Isolation 10–15), 0–3 Wdh. in Reserve. Ziel im Defizit: Kraft halten bis leicht steigern.",
+      "warum": "Krafttraining ist das stärkste Signal, Muskelmasse in der Diät zu erhalten.",
+      "quellen": ["Schoenfeld BJ et al. (2017) J Sports Sci 35:1073–1082 – Volumen und Hypertrophie", "Helms ER et al. (2014) J Int Soc Sports Nutr 11:20"]
+    },
+    {
+      "id": "schlaf",
+      "titel": "Schlaf",
+      "regel": "Schlaffenster 22:30–06:30, Ziel ≥ 7,5 h im Bett.",
+      "warum": "Schlafmangel im Defizit verschiebt den Gewichtsverlust von Fett zu Magermasse.",
+      "quellen": ["Nedeltcheva AV et al. (2010) Ann Intern Med 153:435–441"]
+    },
+    {
+      "id": "schritte",
+      "titel": "Schritte",
+      "regel": "15.000/Tag, an Tagen mit < 45 min Training 20.000.",
+      "warum": "Programmziel (kein Studienwert): Gehen erhöht den Verbrauch ohne die Regeneration fürs Krafttraining zu stören. Gesundheitsnutzen ist ab ca. 8.000–10.000 Schritten belegt.",
+      "quellen": ["Paluch AE et al. (2022) Lancet Public Health 7:e219–e228 – Schritte und Sterblichkeit"]
+    }
+  ],
+  "supplements": [
+    {
+      "id": "kreatin", "name": "Kreatin-Monohydrat", "status": "hast du", "dosis": "5 g täglich, auch an Ruhetagen",
+      "zeit": "Morgens mit Wasser (Zeitpunkt egal – Hauptsache jeden Tag)",
+      "warum": "Mehr Kraft und Trainingsvolumen, unterstützt Muskelerhalt. Kein Laden nötig. Anfangs bis ~1 kg Wasser in den Muskeln – das ist kein Fett (Waage!).",
+      "quellen": ["Kreider RB et al. (2017) J Int Soc Sports Nutr 14:18 – ISSN Position Stand Kreatin"]
+    },
+    {
+      "id": "proteinpulver", "name": "Proteinpulver (Whey)", "status": "hast du", "dosis": "1 Portion (ca. 30 g Protein), wenn das Protein laut Plan fehlt",
+      "zeit": "Nachmittags nach dem Training bzw. als Lückenfüller; abends lieber Magerquark/Skyr",
+      "warum": "Praktisch, um das Proteinziel zu erreichen, wenn das Buffet zu wenig hergibt. Kein Muss, wenn die Mahlzeiten reichen.",
+      "quellen": ["Jäger R et al. (2017) J Int Soc Sports Nutr 14:20"]
+    },
+    {
+      "id": "vitamin_d", "name": "Vitamin D3", "status": "empfohlen", "dosis": "20 µg (800 IE) täglich",
+      "zeit": "Zum Frühstück (mit etwas Fett)",
+      "warum": "Von Oktober bis März bildet die Haut in Deutschland praktisch kein Vitamin D; die DGE nennt 20 µg/Tag, wenn die Eigenbildung fehlt. Am besten beim Aufnahmegespräch den Wert (25-OH-D) bestimmen lassen und die Dosis mit dem Arzt abstimmen.",
+      "quellen": ["Deutsche Gesellschaft für Ernährung – Referenzwert Vitamin D (20 µg/Tag ohne Eigensynthese)"]
+    },
+    {
+      "id": "omega3", "name": "Omega-3 (EPA/DHA)", "status": "optional", "dosis": "ca. 1 g EPA+DHA täglich",
+      "zeit": "Zu einer Mahlzeit",
+      "warum": "Nur sinnvoll, wenn du weniger als 1–2× pro Woche fetten Seefisch isst. Mäßige Evidenz; vorher mit dem Kurarzt besprechen.",
+      "quellen": ["Philpott JD et al. (2019) Res Sports Med 27:219–237 – Übersicht Omega-3 im Sport"]
+    },
+    {
+      "id": "koffein", "name": "Koffein (Kaffee)", "status": "optional", "dosis": "3 mg/kg ca. 45–60 min vor dem Krafttraining",
+      "zeit": "Nicht nach 14 Uhr (Schlaf geht vor)",
+      "warum": "Gut belegte Leistungssteigerung – aber Schlaf ist in der Kur wichtiger.",
+      "quellen": ["Guest NS et al. (2021) J Int Soc Sports Nutr 18:1 – ISSN Position Stand Koffein"]
+    },
+    {
+      "id": "elektrolyte", "name": "Salz/Elektrolyte", "status": "an Saunatagen", "dosis": "Wasser + eine Prise Salz bzw. salzige Brühe nach der Sauna",
+      "zeit": "Zwischen und nach den Saunagängen",
+      "warum": "Ausgleich von Schweißverlusten; kein Präparat nötig.",
+      "quellen": []
+    }
+  ],
+  "nicht_noetig": "BCAA/EAA (bei genug Protein überflüssig), L-Carnitin, Fatburner, Glutamin, Multivitamin ohne nachgewiesenen Mangel."
+}

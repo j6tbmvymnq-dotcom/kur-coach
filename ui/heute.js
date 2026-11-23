@@ -55,6 +55,17 @@ function zeitleiste(d, starts) {
   }));
 }
 
+function planZeilen(d) {
+  const plan = calc.proteinPlan(d.messung);
+  const z = [];
+  if (plan) {
+    const n = plan.mahlzeiten.filter((m) => m.g === plan.portion).length;
+    z.push(`Protein-Plan: ${n} \u00d7 ~${plan.portion} g + ${calc.EVIDENZ.proteinVorSchlafG[1]} g vor dem Schlafen`);
+  }
+  if (d.ziele.defizit != null) z.push(`Defizit heute: ${zf(d.ziele.defizit)} kcal (${String(calc.EVIDENZ.abnahmeProzentWoche).replace('.', ',')} %/Woche)`);
+  return z.length ? h('div', { class: 'plan-zeilen muted' }, z.map((t) => h('p', null, t))) : null;
+}
+
 export async function render(el) {
   const d = await ladeTag();
   const warn = await zuWenigWarnung(d);
@@ -85,7 +96,7 @@ export async function render(el) {
     warn ? h('div', { class: 'warnung-box', role: 'alert' }, h('span', { html: icon('alert', 22) }),
       h('p', null, 'Seit zwei Tagen liegst du deutlich unter deinem Kalorienziel (mehr als 1.000 kcal). Iss ausreichend, Muskeln und Energie brauchen das.')) : null,
     hinweise.map((t) => h('div', { class: 'info-box' }, h('span', { html: icon('scale', 22) }), h('p', null, t))),
-    h('div', { class: 'karte' }, ringe),
+    h('div', { class: 'karte' }, ringe, planZeilen(d)),
     h('a', { href: '#/studio', class: 'btn primaer gross training-btn' }, h('span', { html: icon('dumbbell', 24) }), ' Training starten'),
     h('div', { class: 'aktionen' },
       h('button', { type: 'button', class: 'btn', onclick: () => tagesstartKopieren() }, h('span', { html: icon('copy', 20) }), ' Tagesstart kopieren'),

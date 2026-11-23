@@ -91,8 +91,21 @@ export default function (t) {
   });
   t.gleich(tz.grundumsatz.wert, 1846, 'tagesziele: Grundumsatz 1846');
   t.gleich(tz.umsatz.wert, 2492, 'tagesziele: Umsatz 1846*1,35 = 2492');
-  t.gleich(tz.kcal, 1869, 'tagesziele: kcal 2492*0,75 = 1869');
-  t.gleich(tz.makros.kh, 152, 'tagesziele: KH (1869-704-558)/4 = 151,75 -> 152');
+  // Evidenzmodell: Defizit 88*0,8%*7700/7 = 774 -> 2492-774 = 1718 < Grundumsatz -> 1846
+  t.gleich(tz.kcal, 1846, 'tagesziele: kcal nie unter Grundumsatz (1846)');
+  t.gleich(tz.makros.protein, 177, 'tagesziele: Protein 68 kg FFM * 2,6 = 176,8 -> 177');
+  t.gleich(tz.makros.kh, 145, 'tagesziele: KH (1846-708-558)/4 = 145');
+
+  t.gruppe('Evidenzbasierte Ziele');
+  t.gleich(C.defizitKcal(88), 774, 'defizitKcal: 88*0,008*7700/7 = 774,4 -> 774');
+  t.gleich(C.defizitKcal(88, 'rot'), 387, 'defizitKcal rot: halbe Rate -> 387');
+  t.gleich(C.kcalZielEvidenz(3000, 1850, 88), 2226, 'kcalZielEvidenz: 3000-774 = 2226');
+  t.gleich(C.kcalZielEvidenz(2000, 1300, 88), 1400, 'kcalZielEvidenz: Defizit max 30 % -> 1400');
+  t.gleich(C.proteinZiel({ gewicht: 88.4, kfa: 21.8 }), 180, 'proteinZiel: FFM 69,13*2,6 = 179,7 -> 180');
+  t.gleich(C.proteinZiel({ gewicht: 88 }), 176, 'proteinZiel ohne KFA: 2,0 g/kg -> 176');
+  t.gleich(C.proteinZiel({ gewicht: 100, kfa: 5 }), 240, 'proteinZiel: Obergrenze 2,4 g/kg');
+  t.gleich(C.makrosEvidenz(2200, { gewicht: 88, fettmasse: 20 }).fett, 62, 'makrosEvidenz: Fett max(61,6; 48,9) -> 62');
+  t.gleich(C.proteinPlan({ gewicht: 88.4, kfa: 21.8 }).mahlzeiten.reduce((s, m) => s + m.g, 0), 180, 'proteinPlan: Portionen ergeben Tagesziel');
   t.gleich(tz.schritte, 20000, 'tagesziele: wenig Training -> 20000 Schritte');
 
   // ------------------------------------------------------------ Summen, Warnung, Schritte

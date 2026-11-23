@@ -33,7 +33,7 @@ export async function render(el, params = {}) {
         werteK = r.werte; schritt = 2; zeige();
       };
     } else if (schritt === 2) {
-      inhalt = [h('p', null, 'Dein aktuelles Gewicht (am besten nüchtern gewogen).'), feld('Gewicht (kg)', gew), feld('Körperfett (%)  – optional', kfa)];
+      inhalt = [h('p', null, 'Dein aktuelles Gewicht (am besten nüchtern gewogen).'), feld('Gewicht (kg)', gew), feld('Körperfett (%)  – optional', kfa, 'Mit Körperfettwert wird das Proteinziel genauer.')];
       weiter = () => {
         const g = calc.zahl(gew.value);
         if (g == null || g < 30 || g > 300) return fehler('Bitte ein Gewicht zwischen 30 und 300 kg eingeben.');
@@ -42,7 +42,8 @@ export async function render(el, params = {}) {
         schritt = 3; zeige();
       };
     } else {
-      inhalt = [h('p', null, 'Rahmen der Kur und deine Ziele.'), form.kur];
+      inhalt = [h('p', null, 'Rahmen der Kur.'), form.kur,
+        h('p', { class: 'hinweis' }, 'Deine Ziele berechnet die App aus deinen Messwerten nach aktueller Studienlage (Einstellungen → Ziele & Belege).')];
       weiter = async () => {
         const r = form.lesen({ koerperPruefen: false });
         if (r.fehler) return fehler(r.fehler);

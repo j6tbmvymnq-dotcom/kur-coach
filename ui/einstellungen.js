@@ -2,10 +2,10 @@
 import * as db from '../db.js';
 import * as calc from '../calc.js';
 import { icon } from './icons.js';
-import { h, toast, kopiere, fehlerText, APP_VERSION, minZuHhmm } from './util.js';
+import { h, zf, toast, kopiere, fehlerText, APP_VERSION, minZuHhmm } from './util.js';
 import { bestaetigen } from './sheet.js';
 import { profilFormular, profilZeile } from './profilform.js';
-import { standardChecklisten, slotStarts } from './daten.js';
+import { standardChecklisten, slotStarts, ladeEvidenz, ladeTag } from './daten.js';
 
 export const keinAutoRender = true;
 
@@ -18,6 +18,55 @@ async function einstellungenSpeichern(teil) {
 
 function karte(titel, ...inhalt) {
   return h('section', { class: 'karte einst' }, h('h2', { class: 'klein-titel' }, titel), ...inhalt);
+}
+
+// ---------------------------------------------------------------- Ziele & Belege
+const dez = (n) => String(n).replace('.', ',');
+const quellenListe = (q) => h('ul', { class: 'quellen' }, (q || []).map((x) => h('li', null, x)));
+
+function zeile(label, wert) {
+  return h('div', { class: 'wert-zeile' }, h('span', { class: 'muted' }, label), h('strong', null, wert));
+}
+
+async function zieleKarte() {
+  const [d, ev] = await Promise.all([ladeTag(), ladeEvidenz()]);
+  const z = d.ziele, m = d.messung;
+  let werte;
+  if (!m || z.kcal == null || !z.makros) {
+    werte = h('p', { class: 'hinweis' }, 'Erst Gewicht eintragen, dann berechnet die App deine Ziele.');
+  } else {
+    const plan = calc.proteinPlan(m);
+    const n = plan.mahlzeiten.filter((x) => x.g === plan.portion).length;
+    const kgWoche = m.gewicht * calc.EVIDENZ.abnahmeProzentWoche / 100;
+    werte = h('div', { class: 'werte' },
+      zeile('Kalorienziel', `${zf(z.kcal)} kcal`),
+      zeile('Defizit', `${zf(z.defizit ?? 0)} kcal/Tag`),
+      h('p', { class: 'muted klein-text' }, `${dez(calc.EVIDENZ.abnahmeProzentWoche)} % pro Woche \u2248 ${dez(kgWoche.toFixed(2))} kg/Woche`),
+      zeile('Protein', `${zf(z.makros.protein)} g`),
+      h('p', { class: 'muted klein-text' }, `${n} \u00d7 ~${plan.portion} g + ${calc.EVIDENZ.proteinVorSchlafG[1]} g vor dem Schlafen`),
+      zeile('Fett', `${zf(z.makros.fett)} g`),
+      zeile('Kohlenhydrate', `${zf(z.makros.kh)} g`),
+      zeile('Schritte', zf(z.schritte)));
+  }
+  const belege = (ev?.ziele || []).map((t) => h('details', { class: 'beleg' },
+    h('summary', null, t.titel),
+    h('p', null, h('strong', null, 'Regel: '), t.regel),
+    h('p', null, h('strong', null, 'Warum: '), t.warum),
+    quellenListe(t.quellen)));
+  return karte('Ziele & Belege', werte, ...belege);
+}
+
+async function supplementKarte() {
+  const ev = await ladeEvidenz();
+  if (!ev) return karte('Supplements & Einnahme', h('p', { class: 'muted' }, 'Daten nicht verfügbar.'));
+  const badgeKlasse = { 'hast du': 'ok', empfohlen: 'akzent' };
+  return karte('Supplements & Einnahme',
+    ...(ev.supplements || []).map((s) => h('div', { class: 'supp' },
+      h('div', { class: 'supp-kopf' }, h('strong', null, s.name), h('span', { class: 'badge ' + (badgeKlasse[s.status] || '') }, s.status)),
+      h('p', null, s.dosis), s.zeit ? h('p', { class: 'muted' }, s.zeit) : null,
+      h('p', { class: 'muted klein-text' }, s.warum), quellenListe(s.quellen))),
+    ev.nicht_noetig ? h('p', null, h('strong', null, 'Nicht nötig: '), ev.nicht_noetig) : null,
+    ev.hinweis ? h('p', { class: 'hinweis' }, ev.hinweis) : null);
 }
 
 // ---------------------------------------------------------------- Profil
@@ -186,10 +235,11 @@ function datenKarte(params) {
 export async function render(el, params = {}) {
   const profil = await profilJetzt();
   profil.einstellungen = profil.einstellungen || {};
+  const [zk, sk] = await Promise.all([zieleKarte(), supplementKarte()]);
   el.append(h('div', { class: 'seite einstellungen' },
     h('h1', { class: 'titel gross' }, 'Einstellungen'),
     h('div', { class: 'spalten' },
-      h('div', { class: 'spalte' }, profilKarte(profil), zeitenKarte(profil)),
-      h('div', { class: 'spalte' }, checklistenKarte(profil), datenKarte(params))),
+      h('div', { class: 'spalte' }, zk, profilKarte(profil), zeitenKarte(profil)),
+      h('div', { class: 'spalte' }, sk, checklistenKarte(profil), datenKarte(params))),
     h('p', { class: 'muted version' }, `Kur-Coach Version ${APP_VERSION}`)));
 }

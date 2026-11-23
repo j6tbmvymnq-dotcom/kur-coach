@@ -18,6 +18,25 @@ export async function standardChecklisten() {
   return JSON.parse(JSON.stringify(standardCache));
 }
 
+let evidenzCache = null;
+export async function ladeEvidenz() {
+  if (!evidenzCache) {
+    try { evidenzCache = await (await fetch('./data/evidenz.json')).json(); } catch { return null; }
+  }
+  return evidenzCache;
+}
+
+/** Platzhalter {protein_portion}, {protein_schlaf}, {kreatin} in Checklistentexten ersetzen (nie "{...}" anzeigen) */
+export function ersetzePlatzhalter(text, messung) {
+  const plan = calc.proteinPlan(messung);
+  let t = String(text ?? '');
+  t = plan ? t.replace(/\{protein_portion\}/g, String(plan.portion))
+    : t.replace(/\{protein_portion\}\s*g\b/g, '~0,4 g/kg').replace(/\{protein_portion\}/g, '~0,4 g/kg');
+  return t.replace(/\{protein_schlaf\}/g, String(calc.EVIDENZ.proteinVorSchlafG[1]))
+    .replace(/\{kreatin\}/g, String(calc.EVIDENZ.kreatinG))
+    .replace(/\{[a-z_]+\}/gi, '');
+}
+
 /** Messungen mit Gewicht, neueste zuletzt */
 export function messungenAufsteigend(alle) {
   return alle.filter((m) => m.gewicht != null)
@@ -66,7 +85,8 @@ export async function punkteFuerSlot(slot, d) {
     schritte: d.tag.schritte || 0, proteinIst: d.summe.protein, proteinZiel: d.ziele.makros?.protein ?? null,
     termine: d.termine, jetzt: new Date(), aerztlicheSperre: d.einst.aerztliche_sperre || [],
   };
-  const punkte = basis.filter((p) => calc.bedingungErfuellt(p.wenn, ctx));
+  const punkte = basis.filter((p) => calc.bedingungErfuellt(p.wenn, ctx))
+    .map((p) => ({ ...p, text: ersetzePlatzhalter(p.text, d.messung) }));
   return [...punkte, ...calc.terminPunkte(d.termine, new Date(), 3)];
 }
 
@@ -106,7 +126,7 @@ export async function baueKurkontext() {
       groesse_cm: d.profil?.groesse_cm ?? null,
     },
     ziele: {
-      kcal: d.ziele.kcal, protein: d.ziele.makros?.protein ?? null, schritte: d.ziele.schritte,
+      kcal: d.ziele.kcal, defizit: d.ziele.defizit ?? null, protein: d.ziele.makros?.protein ?? null, schritte: d.ziele.schritte,
       training: ZIEL_TRAINING_MIN,
     },
     gestern: {

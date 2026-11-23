@@ -1,9 +1,9 @@
 // Profil-Formular (Onboarding + Einstellungen). Gibt Gruppen von Feldern und eine Lese-/Prüffunktion zurück.
 import * as calc from '../calc.js';
-import { h, zf1 } from './util.js';
+import { h } from './util.js';
 import { feld, zahlInput } from './sheet.js';
 
-export const STANDARD = { kur_start: '2026-11-25', kur_tage: 21, defizit_prozent: 25, protein_g_pro_kg: 2.0, schritte_ziel: 15000 };
+export const STANDARD = { kur_start: '2026-11-25', kur_tage: 21 };
 
 export function profilFormular(profil = {}, { mitStandard = false } = {}) {
   const p = profil || {};
@@ -16,18 +16,8 @@ export function profilFormular(profil = {}, { mitStandard = false } = {}) {
   const gr = zahlInput(v('groesse_cm'), { platzhalter: 'cm' });
   const start = h('input', { type: 'date', value: v('kur_start') || '' });
   const tage = zahlInput(v('kur_tage'), { ganz: true });
-  const defI = h('input', { type: 'range', min: '15', max: '30', step: '1', value: String(v('defizit_prozent') ?? 25) });
-  const defT = h('output', null, '');
-  const proI = h('input', { type: 'range', min: '1.8', max: '2.4', step: '0.1', value: String(v('protein_g_pro_kg') ?? 2.0) });
-  const proT = h('output', null, '');
-  const sch = zahlInput(v('schritte_ziel'), { ganz: true });
   const arzt = h('textarea', { rows: '3', placeholder: 'Optional: Vorgaben deines Arztes', value: p.vorgaben_arzt || '' });
   const sperre = h('input', { type: 'checkbox', checked: sauna });
-  const aktual = () => {
-    defT.textContent = `${defI.value} %`;
-    proT.textContent = `${zf1(Number(proI.value))} g/kg`;
-  };
-  defI.addEventListener('input', aktual); proI.addEventListener('input', aktual); aktual();
 
   const chips = h('div', { class: 'chips', role: 'radiogroup', 'aria-label': 'Geschlecht' });
   const zeichneChips = () => chips.replaceChildren(...[['m', 'Männlich'], ['w', 'Weiblich']].map(([k, t]) => h('button', {
@@ -42,10 +32,6 @@ export function profilFormular(profil = {}, { mitStandard = false } = {}) {
 
   const kur = h('div', { class: 'gruppe' },
     feld('Kurstart', start), feld('Kurtage', tage),
-    h('div', { class: 'feld' }, h('span', { class: 'feld-label' }, 'Kaloriendefizit ', defT), defI,
-      h('span', { class: 'feld-hinweis' }, 'Zwischen 15 und 30 %. Das Ziel liegt nie unter dem Grundumsatz.')),
-    h('div', { class: 'feld' }, h('span', { class: 'feld-label' }, 'Protein ', proT), proI),
-    feld('Schritte-Ziel pro Tag', sch),
     feld('Ärztliche Vorgaben (optional)', arzt),
     h('label', { class: 'check-zeile' }, sperre, h('span', null, 'Sauna ärztlich gesperrt')));
 
@@ -60,13 +46,11 @@ export function profilFormular(profil = {}, { mitStandard = false } = {}) {
       Object.assign(out, { geschlecht, geburtsjahr: Math.round(jahr), groesse_cm: groesse });
     }
     if (kurPruefen) {
-      const kt = calc.zahl(tage.value), sz = calc.zahl(sch.value);
+      const kt = calc.zahl(tage.value);
       if (!/^\d{4}-\d{2}-\d{2}$/.test(start.value)) return { fehler: 'Bitte das Datum des Kurstarts wählen.' };
       if (kt == null || kt < 1 || kt > 120) return { fehler: 'Bitte die Anzahl der Kurtage eingeben.' };
-      if (sz == null || sz < 1000 || sz > 60000) return { fehler: 'Bitte ein Schritte-Ziel zwischen 1.000 und 60.000 eingeben.' };
       Object.assign(out, {
-        kur_start: start.value, kur_tage: Math.round(kt), defizit_prozent: Number(defI.value),
-        protein_g_pro_kg: Number(proI.value), schritte_ziel: Math.round(sz),
+        kur_start: start.value, kur_tage: Math.round(kt),
         vorgaben_arzt: arzt.value.trim() || null, _sauna_gesperrt: sperre.checked,
       });
     }

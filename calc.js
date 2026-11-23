@@ -140,19 +140,85 @@ export function schritteZiel(basis = 15000, trainingsMinuten = 0) {
   return trainingsMinuten < 45 ? Math.max(basis, 20000) : basis;
 }
 
-/** Ein kompletter Tagesziel-Block (für Heute-Screen und KURKONTEXT) */
-export function tagesziele({ profil, messung, tag = {}, trainings = [], datum = isoDatum() }) {
+// ---------------------------------------------------------------- Evidenzbasierte Ziele
+// Werte und Quellen: docs/evidenz.md. Der Nutzer setzt keine Ziele selbst.
+export const EVIDENZ = {
+  abnahmeProzentWoche: 0.8,     // 0,5–1,0 %/Woche erhält Magermasse (Helms 2014; Garthe 2011)
+  maxDefizitAnteil: 0.30,       // nie mehr als 30 % unter Umsatz
+  proteinGproKgFFM: 2.6,        // 2,3–3,1 g/kg FFM im Defizit + Kraft (Helms 2014; ISSN Jäger 2017)
+  proteinGproKgOhneFFM: 2.0,    // Fallback ohne Körperfett-Messung
+  proteinGrenzenGkg: [1.6, 2.4],
+  proteinProMahlzeitGkg: 0.4,   // 4 Mahlzeiten à 0,4 g/kg (Schoenfeld & Aragon 2018)
+  proteinVorSchlafG: [30, 40],  // Trommelen/Snijders, Kasein-reich (Magerquark/Skyr)
+  fettMinGkg: 0.7, fettMinAnteil: 0.20,
+  kcalProKgFett: 7700,
+  kreatinG: 5,                  // 3–5 g/Tag Monohydrat, Zeitpunkt egal (ISSN Kreider 2017)
+};
+
+/** Protein-Tagesziel in g: über fettfreie Masse, sonst Körpergewicht; begrenzt auf 1,6–2,4 g/kg */
+export function proteinZiel(messung) {
+  const g = messung?.gewicht;
+  if (!g) return null;
+  const ffm = fettfreieMasse(messung);
+  const roh = ffm ? ffm * EVIDENZ.proteinGproKgFFM : g * EVIDENZ.proteinGproKgOhneFFM;
+  const [lo, hi] = EVIDENZ.proteinGrenzenGkg;
+  return runde(Math.min(hi * g, Math.max(lo * g, roh)));
+}
+
+/** Defizit in kcal/Tag aus Zielrate (% Körpergewicht pro Woche). readiness 'rot' -> halbe Rate */
+export function defizitKcal(gewicht, readiness = null, rate = EVIDENZ.abnahmeProzentWoche) {
+  if (!gewicht) return null;
+  const r = readiness === 'rot' ? rate / 2 : rate;
+  return runde((gewicht * (r / 100) * EVIDENZ.kcalProKgFett) / 7);
+}
+
+/** kcal-Ziel = Umsatz − Defizit, Defizit max. 30 % des Umsatzes, nie unter Grundumsatz */
+export function kcalZielEvidenz(umsatz, bmr, gewicht, readiness = null) {
+  if (!umsatz) return null;
+  const d = Math.min(defizitKcal(gewicht, readiness) ?? 0, umsatz * EVIDENZ.maxDefizitAnteil);
+  return runde(Math.max(bmr ?? 0, umsatz - d));
+}
+
+/** Makros nach Evidenz: Protein fest, Fett ≥ 0,7 g/kg und ≥ 20 % kcal, Rest KH */
+export function makrosEvidenz(kcal, messung) {
+  const gewicht = messung?.gewicht;
+  if (!kcal || !gewicht) return null;
+  const protein = proteinZiel(messung);
+  const fett = runde(Math.max(gewicht * EVIDENZ.fettMinGkg, (kcal * EVIDENZ.fettMinAnteil) / 9));
+  const kh = Math.max(0, runde((kcal - protein * 4 - fett * 9) / 4));
+  return { protein, fett, kh };
+}
+
+/** Protein-Verteilung: Portionen über den Tag (für Checklisten/Plan) */
+export function proteinPlan(messung) {
+  const ziel = proteinZiel(messung);
+  if (!ziel) return null;
+  const portion = runde(messung.gewicht * EVIDENZ.proteinProMahlzeitGkg);
+  const schlaf = EVIDENZ.proteinVorSchlafG[1];
+  return {
+    ziel, portion,
+    mahlzeiten: [
+      { slot: 'fruehstueck', g: portion }, { slot: 'mittag', g: portion },
+      { slot: 'nachmittag', g: Math.max(0, ziel - 3 * portion - schlaf) },
+      { slot: 'abend', g: portion }, { slot: 'spaetabend', g: schlaf },
+    ],
+  };
+}
+
+/** Ein kompletter Tagesziel-Block (für Heute-Screen und KURKONTEXT) – evidenzbasiert */
+export function tagesziele({ profil, messung, tag = {}, trainings = [], datum = isoDatum(), readiness = null }) {
   const gu = grundumsatz(profil, messung, datum);
   const gewicht = messung?.gewicht ?? null;
   const um = gesamtumsatz({
     bmr: gu.wert, aktiveKcal: tag.aktive_kcal ?? null, schritte: tag.schritte ?? 0, gewicht, trainings,
   });
-  const kcal = kcalZiel(um.wert, gu.wert, profil?.defizit_prozent);
+  const kcal = kcalZielEvidenz(um.wert, gu.wert, gewicht, readiness);
   const trMin = trainings.reduce((s, t) => s + (t.minuten || 0), 0);
   return {
     grundumsatz: gu, umsatz: um, kcal,
-    makros: makros(kcal, gewicht, zahl(profil?.protein_g_pro_kg)),
-    schritte: schritteZiel(profil?.schritte_ziel ?? 15000, trMin),
+    defizit: um.wert && kcal ? runde(um.wert - kcal) : null,
+    makros: makrosEvidenz(kcal, messung),
+    schritte: schritteZiel(15000, trMin),
   };
 }
 
