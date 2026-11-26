@@ -4,6 +4,7 @@ import * as gym from '../gym.js';
 import { icon } from './icons.js';
 import { sheet, bestaetigen, feld, zahlInput } from './sheet.js';
 import { h, toast, zf1, zfEingabe, fehlerText } from './util.js';
+import { ladeReadiness } from './daten.js';
 import { startPause, stoppe, timerWiederherstellen, wakeLockAn, wakeLockAus } from './studio-timer.js';
 
 const KATEGORIEN = { beine: 'Beine', ruecken: 'Rücken', brust: 'Brust', schulter: 'Schulter', arme: 'Arme', rumpf: 'Rumpf', cardio: 'Cardio' };
@@ -18,7 +19,8 @@ export async function zeigeSession(S, training) {
   const extra = {};              // uebung_id -> zusätzliche Arbeitssätze
   const drafts = {};             // `${uebung_id}|${typ}|${nr}` -> {gewicht, wdh, rir}
   let aktivKey = null;
-  const readiness = null;        // M3 setzt hier die Readiness
+  let readiness = null;
+  try { readiness = (await ladeReadiness()).ampel; } catch { readiness = null; }
 
   wakeLockAn();
   timerWiederherstellen();

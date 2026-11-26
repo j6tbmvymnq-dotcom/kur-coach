@@ -344,6 +344,53 @@ export function streak(tageNeuesteZuerst = [], erfuellt) {
   return n;
 }
 
+// ---------------------------------------------------------------- Readiness (docs/apple-watch.md)
+const mittel = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
+
+/**
+ * Readiness-Ampel. heute: tageswerte von heute; vorher: tageswerte der Vortage (beliebige Reihenfolge,
+ * es zählen die letzten 7 mit Wert). Punkte (Abzüge):
+ *  HRV < 90 % des 7-Tage-Schnitts −1, < 80 % −2 | Ruhepuls ≥ +3 −1, ≥ +5 −2 | Schlaf < 7 h −1, < 6 h −2 |
+ *  Energie (1–5) ≤ 2 −1. Summe 0/−1 grün, −2/−3 gelb, ≤ −4 rot.
+ * Weniger als 3 Vortage mit HRV oder Ruhepuls -> 'kalibrierung' (Schlaf/Energie trotzdem als Gründe).
+ * -> { ampel: 'gruen'|'gelb'|'rot'|'kalibrierung'|null, punkte, gruende[] }
+ */
+export function readiness(heute = {}, vorher = []) {
+  const v = [...vorher].filter((t) => t && !t.geloescht).sort((a, b) => String(b.datum).localeCompare(String(a.datum)));
+  const hrvBasis = v.map((t) => zahl(t.hrv_ms)).filter((x) => x != null).slice(0, 7);
+  const rpBasis = v.map((t) => zahl(t.ruhepuls)).filter((x) => x != null).slice(0, 7);
+  let punkte = 0; const gruende = [];
+  const hrv = zahl(heute.hrv_ms), rp = zahl(heute.ruhepuls), schlaf = zahl(heute.schlaf_min), en = zahl(heute.energie_1_5);
+  const kalibriert = hrvBasis.length >= 3 || rpBasis.length >= 3;
+
+  if (hrv != null && hrvBasis.length >= 3) {
+    const r = hrv / mittel(hrvBasis);
+    if (r < 0.8) { punkte -= 2; gruende.push(`HRV deutlich unter Schnitt (${runde(hrv)} ms)`); }
+    else if (r < 0.9) { punkte -= 1; gruende.push(`HRV unter Schnitt (${runde(hrv)} ms)`); }
+  }
+  if (rp != null && rpBasis.length >= 3) {
+    const d = rp - mittel(rpBasis);
+    if (d >= 5) { punkte -= 2; gruende.push(`Ruhepuls +${runde(d)} über Schnitt`); }
+    else if (d >= 3) { punkte -= 1; gruende.push(`Ruhepuls +${runde(d)} über Schnitt`); }
+  }
+  if (schlaf != null) {
+    if (schlaf < 360) { punkte -= 2; gruende.push(`Kurzer Schlaf (${runde(schlaf / 60, 1)} h)`); }
+    else if (schlaf < 420) { punkte -= 1; gruende.push(`Etwas wenig Schlaf (${runde(schlaf / 60, 1)} h)`); }
+  }
+  if (en != null && en <= 2) { punkte -= 1; gruende.push('Energie niedrig'); }
+
+  if (hrv == null && rp == null && schlaf == null && en == null) return { ampel: null, punkte: 0, gruende };
+  if (!kalibriert) return { ampel: 'kalibrierung', punkte, gruende };
+  return { ampel: punkte <= -4 ? 'rot' : punkte <= -2 ? 'gelb' : 'gruen', punkte, gruende };
+}
+
+export const READINESS_TEXT = {
+  gruen: 'Plan wie vorgesehen – harte Einheit okay.',
+  gelb: 'Krafttraining ja, aber kein HIIT/Tabata; dafür mehr lockeres Gehen.',
+  rot: 'Lockerer Tag: Gehen, Yoga, Aqua. Krafttraining nur mit 1 Satz weniger, Defizit halbiert.',
+  kalibrierung: 'Kalibrierung: Für Vergleichswerte braucht es noch ein paar Tage Watch-Daten.',
+};
+
 // ---------------------------------------------------------------- Gym: Progression
 /** Epley */
 export function e1rm(gewicht, wdh) {

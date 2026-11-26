@@ -275,3 +275,9 @@ body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) 
 .fz-fuss { font-size: 14px; text-align: center; }
 .fz-tipp { flex-direction: row; align-items: center; gap: 14px; min-height: 56px; color: var(--accent); }
 .fz-tipp .fz-kopf-text { color: var(--text); }
+.ampel-karte { gap: 8px; }
+.ampel-zeile { display: flex; align-items: center; gap: 12px; }
+.ampel-punkt { flex: none; width: 18px; height: 18px; border-radius: 50%; }
+.kb-zeile { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
+.kb-schritte { padding-left: 20px; }
+

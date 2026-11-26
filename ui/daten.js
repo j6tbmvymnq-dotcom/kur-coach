@@ -59,6 +59,13 @@ export function slotStarts(einst) {
   return out;
 }
 
+/** Readiness eines Tages: tageswerte der letzten 7 Vortage laden und Ampel berechnen */
+export async function ladeReadiness(datum = calc.isoDatum(), tag = null) {
+  const heute = tag || (await db.get('tageswerte', datum)) || {};
+  const vorher = (await Promise.all([1, 2, 3, 4, 5, 6, 7].map((i) => db.get('tageswerte', calc.addTage(datum, -i))))).filter(Boolean);
+  return calc.readiness(heute, vorher);
+}
+
 export async function ladeTag(datum = calc.isoDatum()) {
   const [profil, messungen, tageswerte, trainings, mahlzeiten, termine] = await Promise.all([
     db.get('profil', 'me'), db.all('messungen'), db.get('tageswerte', datum),
@@ -66,14 +73,15 @@ export async function ladeTag(datum = calc.isoDatum()) {
   ]);
   const tag = tageswerte || {};
   const messung = letzteMessung(messungen);
-  const ziele = calc.tagesziele({ profil: profil || {}, messung, tag, trainings, datum });
+  const readiness = await ladeReadiness(datum, tag);
+  const ziele = calc.tagesziele({ profil: profil || {}, messung, tag, trainings, datum, readiness: readiness.ampel });
   const summe = calc.summeMahlzeiten(mahlzeiten);
   const trainingMin = trainings.reduce((s, t) => s + (t.minuten || 0), 0);
   const kurtag = calc.kurTag(profil?.kur_start, datum, profil?.kur_tage || 21);
   return {
     datum, profil, einst: profil?.einstellungen || {}, messung, tag, trainings, mahlzeiten,
     termine: termine.sort((a, b) => (a.start || '').localeCompare(b.start || '')),
-    ziele, summe, trainingMin, kurtag, messungen,
+    ziele, summe, trainingMin, kurtag, messungen, readiness,
   };
 }
 
@@ -102,6 +110,12 @@ export async function zuWenigWarnung(d) {
     tage.push({ kcalIst: mz.length ? calc.summeMahlzeiten(mz).kcal : null, kcalZiel: ziel });
   }
   return calc.warnungZuWenig(tage);
+}
+
+function readinessKurz(r) {
+  if (!r?.ampel) return null;
+  const g = r.gruende?.length ? ` (${r.gruende.join('; ')})` : '';
+  return `${r.ampel}${g}`;
 }
 
 /** KURKONTEXT-Text für den Tagesstart */
@@ -139,6 +153,7 @@ export async function baueKurkontext() {
       kfaVon: mitKfa[0]?.kfa ?? null, kfaBis: mitKfa.at(-1)?.kfa ?? null,
     },
     plan: d.termine.map((t) => ({ start: t.start, titel: t.titel })),
+    readiness: readinessKurz(d.readiness),
     hinweise,
   };
   return kurkontext(s);

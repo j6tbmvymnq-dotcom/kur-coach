@@ -111,6 +111,16 @@ export default function (t) {
   t.gleich(tzA.makros.protein, 150, 'tagesziele Aufbau: Protein 68*2,2 = 149,6 -> 150');
   t.gleich(C.kcalZielEvidenz(2000, 1500, 200, null, -0.25), 2200, 'Überschuss max +10 %');
 
+  t.gruppe('Readiness');
+  const vt = [50, 52, 48, 50].map((h, i) => ({ datum: `2026-11-2${i}`, hrv_ms: h, ruhepuls: 55 }));
+  t.gleich(C.readiness({}, vt).ampel, null, 'keine Werte heute -> null');
+  t.gleich(C.readiness({ hrv_ms: 50, ruhepuls: 55, schlaf_min: 480 }, vt).ampel, 'gruen', 'alles normal -> grün');
+  t.gleich(C.readiness({ hrv_ms: 44, ruhepuls: 58, schlaf_min: 480 }, vt).ampel, 'gelb', 'HRV 88 % (−1) + Puls +3 (−1) -> gelb');
+  t.gleich(C.readiness({ hrv_ms: 38, ruhepuls: 61, schlaf_min: 400 }, vt).ampel, 'rot', 'HRV 76 % (−2) + Puls +6 (−2) + 6,7 h (−1) -> rot');
+  t.gleich(C.readiness({ schlaf_min: 300 }, vt.slice(0, 2)).ampel, 'kalibrierung', 'weniger als 3 Vortage -> Kalibrierung');
+  t.gleich(C.readiness({ schlaf_min: 300 }, vt.slice(0, 2)).gruende.length, 1, 'Kalibrierung nennt trotzdem Gründe');
+  t.gleich(C.readiness({ hrv_ms: 50, energie_1_5: 2, schlaf_min: 410 }, vt).ampel, 'gelb', 'Energie 2 (−1) + 6,8 h (−1) -> gelb');
+
   t.gruppe('Schritte relativ zum Ziel');
   t.gleich(C.bedingungErfuellt('steps<ziel', { schritte: 9000, schritteZiel: 10000 }), true, 'steps<ziel: 9000 < 10000');
   t.gleich(C.bedingungErfuellt('steps<ziel', { schritte: 10500, schritteZiel: 10000 }), false, 'steps<ziel: Ziel erreicht');

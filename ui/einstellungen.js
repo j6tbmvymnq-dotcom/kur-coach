@@ -4,6 +4,7 @@ import * as calc from '../calc.js';
 import { icon } from './icons.js';
 import { h, zf, toast, kopiere, fehlerText, APP_VERSION, minZuHhmm } from './util.js';
 import { bestaetigen } from './sheet.js';
+import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../config.js';
 import { profilFormular, profilZeile } from './profilform.js';
 import { standardChecklisten, slotStarts, ladeEvidenz, ladeTag } from './daten.js';
 
@@ -184,6 +185,60 @@ function zeitenKarte(profil) {
     h('button', { type: 'button', class: 'btn primaer', onclick: speichern }, 'Zeiten speichern'));
 }
 
+// ---------------------------------------------------------------- Apple Watch / Kurzbefehl
+function kopierZeile(label, wert) {
+  return h('div', { class: 'kb-zeile' },
+    h('span', { class: 'muted klein-text' }, label),
+    h('div', { class: 'url-zeile' }, h('code', null, wert),
+      h('button', { type: 'button', class: 'icon-btn', 'aria-label': `${label} kopieren`, html: icon('copy'),
+        onclick: async () => toast((await kopiere(wert)) ? 'Kopiert' : 'Kopieren nicht möglich') })));
+}
+
+function watchKarte() {
+  if (!db.istOnlineModus()) return null;
+  const status = h('p', { class: 'muted' }, 'Zuletzt empfangen: wird geladen …');
+  const tokenBox = h('div', null);
+  const anleitung = h('div', null, h('p', { class: 'muted' }, 'Anleitung folgt'));
+  const zeigeStatus = async () => {
+    try {
+      const r = await db.rpc('ingest_status');
+      const wert = Array.isArray(r) ? r[0] : r;
+      const t = wert && typeof wert === 'object' ? (Object.values(wert)[0] ?? null) : wert;
+      const dt = t ? new Date(t) : null;
+      status.textContent = dt && !isNaN(dt)
+        ? `Zuletzt empfangen: ${new Intl.DateTimeFormat('de-DE', { dateStyle: 'short', timeStyle: 'short' }).format(dt)}`
+        : 'Zuletzt empfangen: noch nie';
+    } catch (e) { status.textContent = 'Zuletzt empfangen: nicht abrufbar (' + fehlerText(e) + ')'; }
+  };
+  zeigeStatus();
+  const erzeugen = async () => {
+    if (!(await bestaetigen('Kurzbefehl-Token erzeugen', 'Ein bereits vorhandener Token wird ungültig. Der Kurzbefehl muss danach den neuen Token bekommen.', 'Erzeugen'))) return;
+    try {
+      const r = await db.rpc('create_ingest_token');
+      const token = typeof r === 'string' ? r : (Array.isArray(r) ? Object.values(r[0] ?? {})[0] ?? r[0] : Object.values(r ?? {})[0]);
+      tokenBox.replaceChildren(
+        h('p', { class: 'hinweis' }, 'Nur jetzt sichtbar – in den Kurzbefehl einfügen.'),
+        kopierZeile('Token', String(token)));
+    } catch (e) { toast('Token nicht erzeugt: ' + fehlerText(e)); }
+  };
+  const basis = `${SUPABASE_URL}/rest/v1/rpc/ingest_health`;
+  const body = '{"p_token":"…","p_datum":"JJJJ-MM-TT","p_werte":{"schritte":1234}}';
+  fetch('./data/kurzbefehl.json').then((r) => (r.ok ? r.json() : null)).then((j) => {
+    if (!j?.schritte?.length) return;
+    anleitung.replaceChildren(h('ol', { class: 'kb-schritte' }, j.schritte.map((x) =>
+      h('li', null, h('strong', null, x.titel), x.text ? h('p', null, x.text) : null))));
+  }).catch(() => {});
+  return karte('Apple Watch / Kurzbefehl',
+    status,
+    h('button', { type: 'button', class: 'btn', onclick: erzeugen }, 'Kurzbefehl-Token erzeugen'),
+    tokenBox,
+    kopierZeile('URL', basis),
+    kopierZeile('Header apikey', SUPABASE_ANON_KEY),
+    kopierZeile('Header Content-Type', 'application/json'),
+    kopierZeile('Beispiel-Body', body),
+    h('details', { class: 'beleg' }, h('summary', null, 'Schritt-für-Schritt-Anleitung'), anleitung));
+}
+
 // ---------------------------------------------------------------- Daten & Konto
 function datenKarte(params) {
   const dateiName = () => `kur-coach-backup-${calc.isoDatum()}.json`;
@@ -253,6 +308,6 @@ export async function render(el, params = {}) {
     h('h1', { class: 'titel gross' }, 'Einstellungen'),
     h('div', { class: 'spalten' },
       h('div', { class: 'spalte' }, zk, profilKarte(profil), zeitenKarte(profil)),
-      h('div', { class: 'spalte' }, sk, checklistenKarte(profil), datenKarte(params))),
+      h('div', { class: 'spalte' }, sk, watchKarte(), checklistenKarte(profil), datenKarte(params))),
     h('p', { class: 'muted version' }, `Kur-Coach Version ${APP_VERSION}`)));
 }

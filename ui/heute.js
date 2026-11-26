@@ -3,7 +3,8 @@ import * as calc from '../calc.js';
 import { icon } from './icons.js';
 import { h, zf, minZuHhmm, hhmm } from './util.js';
 import { ladeTag, slotStarts, zuWenigWarnung, ZIEL_TRAINING_MIN } from './daten.js';
-import { schritteSheet, wiegenSheet, kurlogSheet, tagesstartKopieren } from './sheet.js';
+import * as db from '../db.js';
+import { schritteSheet, wiegenSheet, kurlogSheet, tagesstartKopieren, sheet, feld, zahlInput } from './sheet.js';
 import { tipp as freizeitTipp } from './freizeit.js';
 
 function ring({ wert, ziel, farbe, label, gross, klein }) {
@@ -58,6 +59,48 @@ function zeitleiste(d, starts) {
   }));
 }
 
+function werteSheet(d) {
+  sheet('Werte manuell', (body, close) => {
+    const t = d.tag || {};
+    const schlaf = zahlInput(t.schlaf_min != null ? calc.runde(t.schlaf_min / 60, 1) : null, { platzhalter: 'z. B. 7,5' });
+    const puls = zahlInput(t.ruhepuls, { ganz: true, platzhalter: 'Schläge/min' });
+    const hrv = zahlInput(t.hrv_ms, { ganz: true, platzhalter: 'ms' });
+    const energie = zahlInput(t.energie_1_5, { ganz: true, platzhalter: '1 bis 5' });
+    const fb = h('p', { class: 'fehler', role: 'alert', hidden: true });
+    const speichern = async () => {
+      const f = {};
+      const s = calc.zahl(schlaf.value), p = calc.zahl(puls.value), v = calc.zahl(hrv.value), e = calc.zahl(energie.value);
+      if (s != null) { if (s < 0 || s > 24) { fb.textContent = 'Schlaf bitte in Stunden (0 bis 24).'; fb.hidden = false; return; } f.schlaf_min = Math.round(s * 60); }
+      if (p != null) { if (p < 20 || p > 220) { fb.textContent = 'Ruhepuls bitte zwischen 20 und 220.'; fb.hidden = false; return; } f.ruhepuls = Math.round(p); }
+      if (v != null) { if (v < 1 || v > 400) { fb.textContent = 'HRV bitte zwischen 1 und 400 ms.'; fb.hidden = false; return; } f.hrv_ms = Math.round(v); }
+      if (e != null) { if (e < 1 || e > 5) { fb.textContent = 'Energie bitte von 1 bis 5.'; fb.hidden = false; return; } f.energie_1_5 = Math.round(e); }
+      if (!Object.keys(f).length) { fb.textContent = 'Bitte mindestens einen Wert eintragen.'; fb.hidden = false; return; }
+      await db.patch('tageswerte', d.datum, { datum: d.datum, ...f });
+      close();
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    };
+    body.append(feld('Schlaf (Stunden)', schlaf), feld('Ruhepuls', puls), feld('HRV (ms)', hrv), feld('Energie (1 bis 5)', energie), fb,
+      h('button', { type: 'button', class: 'btn primaer gross', onclick: speichern }, 'Speichern'));
+  });
+}
+
+function readinessKarte(d) {
+  const r = d.readiness || { ampel: null, gruende: [] };
+  const farbe = { gruen: 'var(--accent)', gelb: 'var(--orange)', rot: '#e5534b', kalibrierung: 'var(--muted, #8a8f98)' }[r.ampel] || 'var(--muted, #8a8f98)';
+  const punkt = h('span', { class: 'ampel-punkt', style: `background:${farbe}`, 'aria-hidden': 'true' });
+  const upd = d.tag?.updated_at ? new Date(d.tag.updated_at) : null;
+  const health = upd && !isNaN(upd) && calc.isoDatum(upd) === d.datum ? h('p', { class: 'muted klein-text' }, `Health zuletzt: ${hhmm(upd)}`) : null;
+  if (!r.ampel) {
+    return h('div', { class: 'karte ampel-karte' },
+      h('div', { class: 'ampel-zeile' }, punkt, h('strong', null, 'Noch keine Watch-Daten heute')),
+      h('button', { type: 'button', class: 'btn', onclick: () => werteSheet(d) }, 'Werte manuell'), health);
+  }
+  return h('div', { class: 'karte ampel-karte' },
+    h('div', { class: 'ampel-zeile' }, punkt, h('span', null, calc.READINESS_TEXT[r.ampel] || '')),
+    r.gruende?.length ? h('p', { class: 'muted klein-text' }, r.gruende.join(' · ')) : null,
+    h('button', { type: 'button', class: 'btn', onclick: () => werteSheet(d) }, 'Werte manuell'), health);
+}
+
 function planZeilen(d) {
   const plan = calc.proteinPlan(d.messung, d.profil);
   const z = [];
@@ -100,6 +143,7 @@ export async function render(el) {
     h('div', { class: 'heute-kopf' },
       h('h1', { class: 'titel gross' }, kopfText(d.kurtag, d.profil)),
       h('p', { class: 'muted' }, new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date()))),
+    readinessKarte(d),
     warn ? h('div', { class: 'warnung-box', role: 'alert' }, h('span', { html: icon('alert', 22) }),
       h('p', null, 'Seit zwei Tagen liegst du deutlich unter deinem Kalorienziel (mehr als 1.000 kcal). Iss ausreichend, Muskeln und Energie brauchen das.')) : null,
     hinweise.map((t) => h('div', { class: 'info-box' }, h('span', { html: icon('scale', 22) }), h('p', null, t))),

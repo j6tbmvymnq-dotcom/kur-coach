@@ -4,6 +4,7 @@ import * as gym from '../gym.js';
 import * as calc from '../calc.js';
 import { icon } from './icons.js';
 import { h, zf1, toast, fehlerText } from './util.js';
+import { ladeReadiness } from './daten.js';
 import { zeigeSession } from './studio-sess.js';
 import { zeigeEnde } from './studio-ende.js';
 import { wakeLockAus } from './studio-timer.js';
@@ -81,8 +82,12 @@ async function zeigeStart(S) {
       h('span', { html: icon('play', 22) }), ` ${v.name}${key === naechste ? ' – als Nächstes' : ''}`);
   });
 
+  let rot = false;
+  try { rot = (await ladeReadiness()).ampel === 'rot'; } catch { rot = false; }
   const seite = h('div', { class: 'spalte' },
     h('h1', { class: 'titel gross' }, 'Studio'),
+    rot ? h('div', { class: 'warnung-box', role: 'alert' }, h('span', { html: icon('alert', 22) }),
+      h('p', null, 'Readiness rot: heute lieber locker. Die Vorschläge haben einen Satz weniger je Übung.')) : null,
     h('div', { class: 'info-box' }, h('span', { html: icon('clock', 22) }),
       h('p', null, 'Auf der Watch „Traditionelles Krafttraining“ starten, dann hier das Training beginnen.')),
     h('div', { class: 'karte' },
