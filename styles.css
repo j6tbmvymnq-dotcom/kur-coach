@@ -295,3 +295,23 @@ body { min-height: 100vh; min-height: 100dvh; }
 .toast { bottom: calc(var(--nav-h) + var(--nav-unten) + 16px); }
 .pause-leiste { bottom: calc(var(--nav-h) + var(--nav-unten)); }
 body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) + var(--nav-unten) + 96px); }
+/* Einstellungen schlank, Backend */
+.zeilen-link { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 16px; background: var(--card); border: 1px solid var(--linie); border-radius: var(--radius); color: var(--text); font-weight: 600; }
+.kopf-zurueck { display: flex; align-items: center; gap: 4px; margin-bottom: 12px; }
+.kopf-zurueck .icon-btn { min-width: 48px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; color: var(--text); }
+.sek-liste { display: flex; flex-direction: column; gap: 10px; }
+.sek { background: var(--card); border: 1px solid var(--linie); border-radius: var(--radius); }
+.sek > summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 16px; cursor: pointer; list-style: none; }
+.sek > summary::-webkit-details-marker { display: none; }
+.sek-titel { font-weight: 650; }
+.sek-status { color: var(--muted); font-size: 14px; font-variant-numeric: tabular-nums; text-align: right; }
+.sek-inhalt { display: flex; flex-direction: column; gap: 12px; padding: 0 16px 16px; }
+.tab-scroll { overflow-x: auto; }
+.tab { border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; width: 100%; }
+.tab th, .tab td { padding: 6px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--linie); }
+.tab thead th { color: var(--muted); font-weight: 600; }
+.tab th:first-child, .tab td:first-child { text-align: left; }
+.tab.kv th { text-align: left; color: var(--muted); font-weight: 500; }
+.tab.kv td { text-align: right; white-space: normal; }
+.ampel-zeile { display: flex; align-items: center; gap: 10px; }
+.ampel-zeile .btn { margin-left: auto; min-height: 44px; padding: 8px 16px; }

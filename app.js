@@ -9,10 +9,11 @@ import * as checkliste from './ui/checkliste.js';
 import * as studio from './ui/studio.js';
 import * as freizeit from './ui/freizeit.js';
 import * as einstellungen from './ui/einstellungen.js';
+import * as backend from './ui/backend.js';
 import * as login from './ui/login.js';
 import * as onboarding from './ui/onboarding.js';
 
-const ROUTEN = { heute, checkliste, studio, freizeit, einstellungen };
+const ROUTEN = { heute, checkliste, studio, freizeit, einstellungen, backend };
 const NAV = [
   ['heute', 'Heute', 'home'], ['checkliste', 'Checkliste', 'check'],
   ['studio', 'Studio', 'dumbbell'], ['freizeit', 'Freizeit', 'compass'], ['einstellungen', 'Einstellungen', 'gear'],
@@ -39,7 +40,7 @@ async function startParameter() {
       } catch { /* Schritte sind nicht kritisch */ }
     }
   }
-  let ziel = location.hash && /^#\/(heute|checkliste|studio|freizeit|einstellungen)/.test(location.hash) ? location.hash : '#/heute';
+  let ziel = location.hash && /^#\/(heute|checkliste|studio|freizeit|einstellungen|backend)/.test(location.hash) ? location.hash : '#/heute';
   if (slot && calc.istSlot(slot)) ziel = `#/checkliste/${slot}`;
   history.replaceState(null, '', location.pathname + ziel);   // Query entfernt
 }
@@ -88,7 +89,7 @@ async function route() {
   const zeigeNav = anzeigeName !== 'login' && anzeigeName !== 'onboarding';
   nav.hidden = !zeigeNav;
   document.body.classList.toggle('ohne-nav', !zeigeNav);
-  if (zeigeNav) navZeichnen(name);
+  if (zeigeNav) navZeichnen(name === 'backend' ? 'einstellungen' : name);
   window.scrollTo(0, behalten ? x : 0);
 }
 

@@ -87,33 +87,13 @@ function werteSheet(d) {
 function readinessKarte(d) {
   const r = d.readiness || { ampel: null, gruende: [] };
   const farbe = { gruen: 'var(--accent)', gelb: 'var(--orange)', rot: '#e5534b', kalibrierung: 'var(--muted, #8a8f98)' }[r.ampel] || 'var(--muted, #8a8f98)';
+  const wort = { gruen: 'Gut erholt', gelb: 'Etwas gebremst', rot: 'Erholung zuerst', kalibrierung: 'Sammle Daten' }[r.ampel] || 'Keine Watch-Daten';
   const punkt = h('span', { class: 'ampel-punkt', style: `background:${farbe}`, 'aria-hidden': 'true' });
-  const upd = d.tag?.updated_at ? new Date(d.tag.updated_at) : null;
-  const health = upd && !isNaN(upd) && calc.isoDatum(upd) === d.datum ? h('p', { class: 'muted klein-text' }, `Health zuletzt: ${hhmm(upd)}`) : null;
-  if (!r.ampel) {
-    return h('div', { class: 'karte ampel-karte' },
-      h('div', { class: 'ampel-zeile' }, punkt, h('strong', null, 'Noch keine Watch-Daten heute')),
-      h('button', { type: 'button', class: 'btn', onclick: () => werteSheet(d) }, 'Werte manuell'), health);
-  }
+  const empf = r.ampel === 'gelb' || r.ampel === 'rot' ? h('p', { class: 'muted klein-text' }, calc.READINESS_TEXT[r.ampel]) : null;
   return h('div', { class: 'karte ampel-karte' },
-    h('div', { class: 'ampel-zeile' }, punkt, h('span', null, calc.READINESS_TEXT[r.ampel] || '')),
-    r.gruende?.length ? h('p', { class: 'muted klein-text' }, r.gruende.join(' · ')) : null,
-    h('button', { type: 'button', class: 'btn', onclick: () => werteSheet(d) }, 'Werte manuell'), health);
-}
-
-function planZeilen(d) {
-  const plan = calc.proteinPlan(d.messung, d.profil);
-  const z = [];
-  if (plan) {
-    const n = plan.mahlzeiten.filter((m) => m.g === plan.portion).length;
-    z.push(`Protein-Plan: ${n} \u00d7 ~${plan.portion} g + ${calc.EVIDENZ.proteinVorSchlafG[1]} g vor dem Schlafen`);
-  }
-  if (d.ziele.defizit != null) {
-    const M = calc.ZIEL_MODI[d.ziele.modus];
-    const art = d.ziele.defizit < 0 ? 'Überschuss' : 'Defizit';
-    z.push(`${M.name} – ${art} heute: ${zf(Math.abs(d.ziele.defizit))} kcal (${String(Math.abs(M.rate)).replace('.', ',')} %/Woche)`);
-  }
-  return z.length ? h('div', { class: 'plan-zeilen muted' }, z.map((t) => h('p', null, t))) : null;
+    h('div', { class: 'ampel-zeile' }, punkt, h('strong', null, wort),
+      h('button', { type: 'button', class: 'btn klein', onclick: () => werteSheet(d) }, 'Werte')),
+    empf);
 }
 
 export async function render(el) {
@@ -147,7 +127,7 @@ export async function render(el) {
     warn ? h('div', { class: 'warnung-box', role: 'alert' }, h('span', { html: icon('alert', 22) }),
       h('p', null, 'Seit zwei Tagen liegst du deutlich unter deinem Kalorienziel (mehr als 1.000 kcal). Iss ausreichend, Muskeln und Energie brauchen das.')) : null,
     hinweise.map((t) => h('div', { class: 'info-box' }, h('span', { html: icon('scale', 22) }), h('p', null, t))),
-    h('div', { class: 'karte' }, ringe, planZeilen(d)),
+    h('div', { class: 'karte' }, ringe),
     h('a', { href: '#/studio', class: 'btn primaer gross training-btn' }, h('span', { html: icon('dumbbell', 24) }), ' Training starten'),
     h('div', { class: 'aktionen' },
       h('button', { type: 'button', class: 'btn', onclick: () => tagesstartKopieren() }, h('span', { html: icon('copy', 20) }), ' Tagesstart kopieren'),
