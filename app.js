@@ -74,6 +74,7 @@ async function route() {
   if (mein !== token) return;
 
   const x = window.scrollY;
+  const chipsX = [...main.querySelectorAll('.chips.scroll')].map((c) => c.scrollLeft);
   const behalten = aktuell && aktuell.name === anzeigeName && aktuell.slot === params.slot;
   const wrap = h('div', { class: 'ansicht' });
   try {
@@ -91,6 +92,11 @@ async function route() {
   document.body.classList.toggle('ohne-nav', !zeigeNav);
   if (zeigeNav) navZeichnen(name === 'backend' ? 'einstellungen' : name);
   window.scrollTo(0, behalten ? x : 0);
+  // Chip-Leisten: Scrollposition beim Neuzeichnen erhalten, sonst aktiven Chip mittig zeigen
+  main.querySelectorAll('.chips.scroll').forEach((c, i) => {
+    if (behalten && chipsX[i] != null) c.scrollLeft = chipsX[i];
+    else { const akt = c.querySelector('.aktiv'); if (akt) c.scrollLeft = Math.max(0, akt.offsetLeft - (c.clientWidth - akt.offsetWidth) / 2); }
+  });
 }
 
 function neuRendernPlanen() {
