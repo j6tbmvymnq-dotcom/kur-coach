@@ -111,6 +111,13 @@ export default function (t) {
   t.gleich(tzA.makros.protein, 150, 'tagesziele Aufbau: Protein 68*2,2 = 149,6 -> 150');
   t.gleich(C.kcalZielEvidenz(2000, 1500, 200, null, -0.25), 2200, 'Überschuss max +10 %');
 
+  t.gruppe('Schritte relativ zum Ziel');
+  t.gleich(C.bedingungErfuellt('steps<ziel', { schritte: 9000, schritteZiel: 10000 }), true, 'steps<ziel: 9000 < 10000');
+  t.gleich(C.bedingungErfuellt('steps<ziel', { schritte: 10500, schritteZiel: 10000 }), false, 'steps<ziel: Ziel erreicht');
+  t.gleich(C.bedingungErfuellt('steps<ziel*0.5', { schritte: 4000, schritteZiel: 10000 }), true, 'steps<ziel*0.5: 4000 < 5000');
+  t.gleich(C.bedingungErfuellt('steps<ziel*0.5', { schritte: 6000, schritteZiel: 10000 }), false, 'steps<ziel*0.5: 6000 >= 5000');
+  t.gleich(C.bedingungErfuellt('steps<ziel', { schritte: 0 }), true, 'ohne Ziel: anzeigen');
+
   t.gruppe('Evidenzbasierte Ziele');
   t.gleich(C.defizitKcal(88), 774, 'defizitKcal: 88*0,008*7700/7 = 774,4 -> 774');
   t.gleich(C.defizitKcal(88, 'rot'), 387, 'defizitKcal rot: halbe Rate -> 387');

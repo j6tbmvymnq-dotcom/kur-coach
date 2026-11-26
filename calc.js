@@ -305,6 +305,13 @@ export function bedingungErfuellt(wenn, ctx = {}) {
     const s = ctx.schritte ?? 0, n = Number(m[2]);
     return { '<': s < n, '<=': s <= n, '>': s > n, '>=': s >= n }[m[1]];
   }
+  // "steps<ziel" bzw. "steps<ziel*0.5": relativ zum Schritteziel des Tages (aus tagesziele)
+  m = w.match(/^steps\s*(<|>=)\s*ziel(?:\s*\*\s*([\d.]+))?$/);
+  if (m) {
+    if (!ctx.schritteZiel) return true;
+    const n = ctx.schritteZiel * (m[2] ? Number(m[2]) : 1), s = ctx.schritte ?? 0;
+    return m[1] === '<' ? s < n : s >= n;
+  }
   m = w.match(/^kein_termin_vor_(\d{1,2}):(\d{2})$/);
   if (m) {
     const grenze = Number(m[1]) * 60 + Number(m[2]);

@@ -32,7 +32,7 @@ function zeitleiste(d, starts) {
   const eintraege = [];
   for (const t of d.termine) {
     // geplantes Training grün, Therapie/Arzt/Kurs grau
-    const art = t.kategorie === 'training' ? 'training' : 'termin';
+    const art = t.kategorie === 'training' || t.kategorie === 'bewegung' ? 'training' : 'termin';
     eintraege.push({ min: calc.zeitZuMin(t.start), art, titel: t.titel, sub: [t.ende ? `bis ${t.ende.slice(0, 5)}` : null, t.ort].filter(Boolean).join(' · '), zeit: t.start?.slice(0, 5) });
   }
   for (const t of d.trainings) {

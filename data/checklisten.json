@@ -62,8 +62,8 @@
     },
     {
       "id": "schritte_mittag",
-      "text": "Schritte ≥ 8.000? Sonst Spaziergang nach dem Essen",
-      "wenn": "steps<8000"
+      "text": "Unter der Hälfte vom Schritteziel? 20 min Verdauungsspaziergang nach dem Essen",
+      "wenn": "steps<ziel*0.5"
     },
     {
       "id": "wasser_2l",
@@ -83,6 +83,10 @@
     {
       "id": "training_loggen",
       "text": "Training an Claude melden (Art, Dauer, Gewichte)"
+    },
+    {
+      "id": "bewegung_nm",
+      "text": "Zwischen Terminen und Training: 10–15 min draußen gehen"
     }
   ],
   "abend": [
@@ -100,8 +104,8 @@
     },
     {
       "id": "abendrunde",
-      "text": "30–60 min Abendrunde (Stirnlampe)",
-      "wenn": "steps<15000"
+      "text": "Abendrunde 30–45 min (Stirnlampe) bis zum Schritteziel",
+      "wenn": "steps<ziel"
     }
   ],
   "spaetabend": [
@@ -120,7 +124,8 @@
     },
     {
       "id": "schritte_final",
-      "text": "Schritte-Ziel erreicht?"
+      "text": "Schritteziel noch offen? 15 min Runde ums Haus",
+      "wenn": "steps<ziel"
     }
   ],
   "abschluss": [

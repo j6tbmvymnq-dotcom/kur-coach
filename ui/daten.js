@@ -82,7 +82,8 @@ export async function punkteFuerSlot(slot, d) {
   const std = await standardChecklisten();
   const basis = d.einst.checklisten?.[slot] ?? std[slot] ?? [];
   const ctx = {
-    schritte: d.tag.schritte || 0, proteinIst: d.summe.protein, proteinZiel: d.ziele.makros?.protein ?? null,
+    schritte: d.tag.schritte || 0, schritteZiel: d.ziele.schritte ?? null,
+    proteinIst: d.summe.protein, proteinZiel: d.ziele.makros?.protein ?? null,
     termine: d.termine, jetzt: new Date(), aerztlicheSperre: d.einst.aerztliche_sperre || [],
   };
   const punkte = basis.filter((p) => calc.bedingungErfuellt(p.wenn, ctx))
