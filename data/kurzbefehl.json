@@ -1,11 +1,33 @@
 {
   "stand": "2026-11-26 (iOS 27.2)",
   "schritte": [
-    { "titel": "1. Token erzeugen", "text": "Oben auf dieser Seite „Kurzbefehl-Token erzeugen“ tippen, Token kopieren und kurz in Notizen parken. Er wird nur einmal angezeigt; ein neuer Token macht den alten ungültig." },
-    { "titel": "2. Aufbau", "text": "Pro Wert ein eigener Kurzbefehl (HS Schritte, HS Energie, HS Ruhepuls, HS HRV, HS Schlaf). Ein Chef-Kurzbefehl „Health-Sync“ führt sie nacheinander aus („Kurzbefehl ausführen“). Unsichere Werte stehen hinten – findet eine Suche nichts, bricht die Kette dort ab, die vorderen Werte sind dann schon gesendet." },
-    { "titel": "3. Einzel-Kurzbefehl (Muster)", "text": "a) „Health-Messungen suchen“: Typ (siehe Tabelle), Startdatum ist heute, Gruppieren nach: Tag, „Fehlende ausfüllen“ AUS. b) „Statistik berechnen“: Summe bzw. Durchschnitt. c) „Datum formatieren“: Aktuelles Datum, Eigenes Format yyyy-MM-dd. d) „Inhalte von URL abrufen“: URL, Methode POST, Header apikey + Content-Type (Werte siehe oben – keine leere Header-Zeile!), Anfragetext JSON: p_token (Text) = Token, p_datum (Text) = Formatiertes Datum, p_werte (Wörterbuch) mit EINEM Eintrag vom Typ TEXT (nicht Zahl – sonst wird aus 64,89 eine Riesenzahl)." },
-    { "titel": "4. Typen", "text": "HS Schritte: Schritte, Summe, Schlüssel schritte. HS Energie: Aktivitätsenergie, Summe, aktive_kcal. HS Ruhepuls: Ruheherzfrequenz, Durchschnitt, ruhepuls. HS HRV: Herzfrequenzvariabilität, Durchschnitt, hrv_ms." },
-    { "titel": "5. Schlaf (HS Schlaf)", "text": "Typ Schlaf, Startdatum in den letzten 14 Stunden, Filter „Wert ist nicht Wach“ und „Wert ist nicht Im Bett“, Gruppieren: Ohne. Dann „Details von Health-Messungen abrufen: Dauer“ und „Statistik berechnen: Summe“. Sendet nur vormittags (bis 11 Uhr), Schlüssel schlaf_min. Einheit wird am ersten Morgen geprüft." },
-    { "titel": "6. Hinweise", "text": "Bei gesperrtem iPhone kann iOS keine Health-Daten lesen – Automationen nach Uhrzeit liefern dann evtl. nichts. Zuverlässig ist der Lauf beim Entsperren bzw. beim Öffnen der App über den Kurzbefehl. „Ergebnis anzeigen“ nach dem Testen entfernen. Erfolg prüfen: hier „Zuletzt empfangen“ bzw. auf Heute „Health zuletzt“." }
+    {
+      "titel": "1. Token erzeugen",
+      "text": "Oben auf dieser Seite „Kurzbefehl-Token erzeugen“ tippen, Token kopieren und kurz in Notizen parken. Er wird nur einmal angezeigt; ein neuer Token macht den alten ungültig."
+    },
+    {
+      "titel": "2. Aufbau",
+      "text": "Pro Wert ein eigener Kurzbefehl (HS Schritte, HS Energie, HS Ruhepuls, HS HRV, HS Schlaf). Ein Chef-Kurzbefehl „Health-Sync“ führt sie nacheinander aus („Kurzbefehl ausführen“). Unsichere Werte stehen hinten – findet eine Suche nichts, bricht die Kette dort ab, die vorderen Werte sind dann schon gesendet."
+    },
+    {
+      "titel": "3. Einzel-Kurzbefehl (Muster)",
+      "text": "a) „Health-Messungen suchen“: Typ (siehe Tabelle), Startdatum ist heute, Gruppieren nach: Tag, „Fehlende ausfüllen“ AUS. b) „Statistik berechnen“: Summe bzw. Durchschnitt. c) „Datum formatieren“: Aktuelles Datum, Eigenes Format yyyy-MM-dd. d) „Inhalte von URL abrufen“: URL, Methode POST, Header apikey + Content-Type (Werte siehe oben – keine leere Header-Zeile!), Anfragetext JSON: p_token (Text) = Token, p_datum (Text) = Formatiertes Datum, p_werte (Wörterbuch) mit EINEM Eintrag vom Typ TEXT (nicht Zahl – sonst wird aus 64,89 eine Riesenzahl)."
+    },
+    {
+      "titel": "4. Typen",
+      "text": "HS Schritte: Schritte, Summe, Schlüssel schritte. HS Energie: Aktivitätsenergie, Summe, aktive_kcal. HS Ruhepuls: Ruheherzfrequenz, Durchschnitt, ruhepuls. HS HRV: Herzfrequenzvariabilität, Durchschnitt, hrv_ms."
+    },
+    {
+      "titel": "5. Schlaf (HS Schlaf)",
+      "text": "Typ Schlaf, Startdatum in den letzten 14 Stunden, Filter „Wert ist nicht Wach“ und „Wert ist nicht Im Bett“, Gruppieren: Ohne. Dann „Details von Health-Messungen abrufen: Dauer“ und „Statistik berechnen: Summe“. Sendet nur vormittags (bis 11 Uhr), Schlüssel schlaf_min. Einheit wird am ersten Morgen geprüft."
+    },
+    {
+      "titel": "5b. Waage (HS Gewicht, HS KFA)",
+      "text": "Typ Gewicht bzw. Körperfettanteil, Startdatum in den letzten 7 Tagen, Sortieren nach Startdatum (Neueste zuerst), Beschränken auf 1, Gruppieren: Ohne. Dann „Details von Health-Messungen abrufen“: Wert und Startdatum. p_datum = Startdatum formatiert yyyy-MM-dd (nicht das aktuelle Datum!), p_werte: gewicht bzw. kfa (Text) = Wert, gewicht_zeit (Text) = Startdatum formatiert HH:mm. Vor 10 Uhr gewogen zählt als nüchtern. Da immer ein Wert der letzten 7 Tage gefunden wird, bricht dieser Kurzbefehl nicht ab."
+    },
+    {
+      "titel": "6. Hinweise",
+      "text": "Bei gesperrtem iPhone kann iOS keine Health-Daten lesen – Automationen nach Uhrzeit liefern dann evtl. nichts. Zuverlässig ist der Lauf beim Entsperren bzw. beim Öffnen der App über den Kurzbefehl. „Ergebnis anzeigen“ nach dem Testen entfernen. Erfolg prüfen: hier „Zuletzt empfangen“ bzw. auf Heute „Health zuletzt“."
+    }
   ]
 }
