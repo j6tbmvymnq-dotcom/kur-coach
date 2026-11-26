@@ -17,6 +17,37 @@ export async function render(el, params = {}) {
   }
 
   let email = '';
+  // Standard: E-Mail + Passwort (funktioniert in Safari und in der Home-Bildschirm-App gleich)
+  const schrittPasswort = (neu = false, hinweis = '') => {
+    const inpMail = h('input', { type: 'email', autocomplete: 'email', inputmode: 'email', autocapitalize: 'off', placeholder: 'name@beispiel.de', value: email });
+    const inpPw = h('input', { type: 'password', autocomplete: neu ? 'new-password' : 'current-password', placeholder: neu ? 'mind. 6 Zeichen' : 'Passwort' });
+    const fb = h('p', { class: 'fehler', role: 'alert', hidden: true });
+    const info = h('p', { class: 'hinweis', hidden: !hinweis }, hinweis);
+    const btn = h('button', { type: 'button', class: 'btn primaer gross' }, neu ? 'Konto anlegen' : 'Anmelden');
+    const los = async () => {
+      email = inpMail.value.trim();
+      if (!/^\S+@\S+\.\S+$/.test(email)) { fb.textContent = 'Bitte eine gültige E-Mail-Adresse eingeben.'; fb.hidden = false; return; }
+      if (inpPw.value.length < 6) { fb.textContent = 'Das Passwort muss mindestens 6 Zeichen haben.'; fb.hidden = false; return; }
+      btn.disabled = true; fb.hidden = true;
+      try {
+        const r = await db.loginPasswort(email, inpPw.value, neu);
+        if (r.bestaetigen) {
+          schrittPasswort(false, 'Fast geschafft: Bestätigungsmail ist unterwegs. Link in der Mail antippen, dann hier mit E-Mail und Passwort anmelden.');
+          return;
+        }
+        try { await db.sync(); } catch { /* offline: später */ }
+        params.weiter?.();
+      } catch (e) { fb.textContent = fehlerText(e); fb.hidden = false; btn.disabled = false; }
+    };
+    btn.addEventListener('click', los);
+    inpPw.addEventListener('keydown', (e) => { if (e.key === 'Enter') los(); });
+    box.replaceChildren(
+      h('p', null, neu ? 'Neues Konto: E-Mail und ein Passwort wählen.' : 'Mit E-Mail und Passwort anmelden.'),
+      feld('E-Mail', inpMail), feld('Passwort', inpPw), fb, info, btn,
+      h('button', { type: 'button', class: 'btn', onclick: () => schrittPasswort(!neu) }, neu ? 'Ich habe schon ein Konto' : 'Erstes Mal? Konto anlegen'),
+      h('button', { type: 'button', class: 'btn', onclick: () => schrittEmail() }, 'Stattdessen Link per Mail'));
+  };
+
   const schrittEmail = () => {
     const inp = h('input', { type: 'email', autocomplete: 'email', inputmode: 'email', autocapitalize: 'off', placeholder: 'name@beispiel.de', value: email });
     const fb = h('p', { class: 'fehler', role: 'alert', hidden: true });
@@ -30,8 +61,9 @@ export async function render(el, params = {}) {
     btn.addEventListener('click', senden);
     inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') senden(); });
     box.replaceChildren(
-      h('p', null, 'Melde dich mit deiner E-Mail-Adresse an. Du bekommst eine Mail mit Link und 6-stelligem Code.'),
-      feld('E-Mail', inp), fb, btn);
+      h('p', null, 'Du bekommst eine Mail mit Anmelde-Link (öffnet Safari).'),
+      feld('E-Mail', inp), fb, btn,
+      h('button', { type: 'button', class: 'btn', onclick: () => schrittPasswort(false) }, 'Zurück zu Passwort'));
   };
 
   const schrittCode = () => {
@@ -61,5 +93,5 @@ export async function render(el, params = {}) {
       h('button', { type: 'button', class: 'btn', onclick: schrittEmail }, 'Andere E-Mail oder neuer Code'));
   };
 
-  schrittEmail();
+  schrittPasswort(false);
 }

@@ -280,6 +280,36 @@ export async function loginLink(email) {
   } catch (e) { throw new Error(deutscheFehler(e, 'link')); }
 }
 
+/**
+ * Anmeldung mit E-Mail + Passwort (braucht keine angepasste Mail-Vorlage).
+ * neu=true: Konto anlegen. Ist in Supabase "Confirm email" aktiv, kommt erst eine Bestätigungsmail
+ * -> Rückgabe {bestaetigen:true}; nach dem Klick auf den Link normal anmelden.
+ */
+export async function loginPasswort(email, passwort, neu = false) {
+  if (demo) return {};
+  await init();
+  const e = String(email || '').trim();
+  let r;
+  try {
+    r = neu
+      ? await sb.auth.signUp({ email: e, password: passwort, options: { emailRedirectTo: location.origin + location.pathname } })
+      : await sb.auth.signInWithPassword({ email: e, password: passwort });
+    if (r.error) throw r.error;
+  } catch (x) {
+    const m = String(x?.message || x);
+    if (/invalid login credentials/i.test(m)) throw new Error('E-Mail oder Passwort falsch.');
+    if (/email not confirmed/i.test(m)) throw new Error('Bitte zuerst den Bestätigungslink in der Mail antippen, dann hier anmelden.');
+    if (/already registered/i.test(m)) throw new Error('Für diese E-Mail gibt es schon ein Konto – bitte „Anmelden“ wählen.');
+    if (/password should be at least/i.test(m)) throw new Error('Das Passwort muss mindestens 6 Zeichen haben.');
+    throw new Error(deutscheFehler(x, 'passwort'));
+  }
+  if (!r.data?.session) return { bestaetigen: true };
+  _session = r.data.session;
+  meldeStatus();
+  sync().catch(() => {});
+  return {};
+}
+
 export async function loginCode(email, code) {
   if (demo) return;
   await init();
