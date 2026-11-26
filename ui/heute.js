@@ -96,6 +96,28 @@ function readinessKarte(d) {
     empf);
 }
 
+// Ausblick: Termine des nächsten Tages (Therapieplan + geplantes Training)
+async function morgenKarte(d) {
+  const morgen = calc.addTage(d.datum, 1);
+  const kt = calc.kurTag(d.profil?.kur_start, morgen, d.profil?.kur_tage || 21);
+  if (d.profil?.kur_start && kt.status === 'vorbei') return null;
+  let termine = [];
+  try { termine = await db.byDatum('termine', morgen); } catch { termine = []; }
+  termine.sort((a, b) => (a.start || '').localeCompare(b.start || ''));
+  const datumText = new Intl.DateTimeFormat('de-DE', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date(morgen + 'T12:00:00'));
+  const titel = 'Morgen' + (kt?.status === 'laeuft' ? ` · Tag ${kt.tag}` : '') + ` · ${datumText}`;
+  const inhalt = termine.length
+    ? h('ul', { class: 'zeit' }, termine.map((t) => {
+      const art = t.kategorie === 'training' || t.kategorie === 'bewegung' ? 'training' : 'termin';
+      const sub = [t.ende ? `bis ${t.ende.slice(0, 5)}` : null, t.ort].filter(Boolean).join(' · ');
+      return h('li', { class: `zeit-eintrag ${art}` }, h('div', { class: 'zeit-zeile' },
+        h('span', { class: 'zeit-uhr' }, t.start?.slice(0, 5) || ''), h('span', { class: 'zeit-punkt' }),
+        h('span', { class: 'zeit-text' }, h('strong', null, t.titel || 'Termin'), sub ? h('small', null, sub) : null)));
+    }))
+    : h('p', { class: 'leer' }, 'Für morgen ist noch nichts geplant. Therapieplan per KURLOG importieren.');
+  return h('div', { class: 'karte' }, h('h2', { class: 'klein-titel' }, titel), inhalt);
+}
+
 export async function render(el) {
   const d = await ladeTag();
   const warn = await zuWenigWarnung(d);
@@ -137,6 +159,8 @@ export async function render(el) {
 
   const rechts = h('div', { class: 'spalte' },
     h('div', { class: 'karte' }, h('h2', { class: 'klein-titel' }, 'Zeitleiste heute'), zeitleiste(d, starts)));
+
+  try { const m = await morgenKarte(d); if (m) rechts.append(m); } catch { /* Ausblick optional */ }
 
   let tipp = null;
   try { tipp = await freizeitTipp(); } catch { tipp = null; }
