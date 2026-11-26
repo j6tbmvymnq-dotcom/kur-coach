@@ -102,6 +102,14 @@ export default function (t) {
     async put(tab, row) { log.push(['put', tab, row.id]); (speicher[tab] ||= {})[row.id] = row; return row; },
     async patch(tab, key, felder) { log.push(['patch', tab, key]); speicher[tab] ||= {}; speicher[tab][key] = { ...(speicher[tab][key] || {}), ...felder }; return speicher[tab][key]; },
   };
+  {
+    const nd = normalisiere({ loeschen: { termine: ['a', 'a', ' b '], quatsch: ['x'] } });
+    t.gleich(nd.loeschen, { termine: ['a', 'b'] }, 'loeschen: IDs bereinigt und eindeutig');
+    t.wahr(nd.warnungen.some((w) => w.includes('quatsch')), 'loeschen: unbekannte Tabelle gewarnt');
+    t.gleich(vorschauText(nd), '2 Einträge werden gelöscht', 'loeschen: Vorschautext');
+    const r = parseKurlog('{"loeschen": {"termine": ["a"]}}');
+    t.wahr(r.ok !== false && normalisiere(r.daten).loeschen?.termine?.[0] === 'a', 'loeschen: ohne Kopfzeile erkannt');
+  }
   return uebernehmen(n, fakeDb).then(async anzahl => {
     t.gleich(anzahl, 7, 'uebernehmen gibt Anzahl zurück');
     t.wahr(log.some(l => l[0] === 'patch' && l[1] === 'tageswerte' && l[2] === '2026-11-29'), 'tageswerte per patch(datum)');

@@ -69,7 +69,7 @@ export function parseKurlog(text) {
   let m;
   while ((m = re.exec(t)) !== null) treffer.push(m.index + m[0].length);
   // Ohne Kopfzeile: reines JSON mit bekannten Listen akzeptieren (Claude lässt „KURLOG v1“ manchmal weg)
-  if (!treffer.length && /"(mahlzeiten|messungen|trainings|termine|schritte|tag|plan)"\s*:/.test(t2)) {
+  if (!treffer.length && /"(mahlzeiten|messungen|trainings|termine|schritte|tag|plan|loeschen)"\s*:/.test(t2)) {
     const i = t2.indexOf('{');
     if (i >= 0) treffer.push(i);
   }
@@ -276,6 +276,16 @@ export function normalisiere(daten) {
   });
   out.tageswerte = [...tw.values()];
   if (istObj(d.plan)) out.plan = d.plan; // wird in der Oberfläche gegen den Katalog geprüft (plan.js)
+  // loeschen: { termine: ['id', ...], mahlzeiten: [...], trainings: [...], messungen: [...] } -> weich löschen
+  if (istObj(d.loeschen)) {
+    const del = {};
+    for (const tab of ['mahlzeiten', 'messungen', 'trainings', 'termine']) {
+      const ids = liste(d.loeschen[tab]).map((x) => String(x ?? '').trim()).filter(Boolean);
+      if (ids.length) del[tab] = [...new Set(ids)];
+    }
+    for (const k of Object.keys(d.loeschen)) if (!['mahlzeiten', 'messungen', 'trainings', 'termine'].includes(k)) warn(`loeschen: unbekannte Tabelle „${k}“ ignoriert`);
+    if (Object.keys(del).length) out.loeschen = del;
+  }
   return out;
 }
 
@@ -291,6 +301,9 @@ export function vorschauText(norm) {
     if (n > 0) { teile.push(`${n} ${n === 1 ? s : p}`); summe += n; }
   }
   if (norm?.plan) { teile.push('Planänderung'); summe += 1; }
+  const nDel = Object.values(norm?.loeschen || {}).reduce((a, l) => a + l.length, 0);
+  if (!teile.length && nDel) return `${nDel} ${nDel === 1 ? 'Eintrag wird' : 'Einträge werden'} gelöscht`;
+  if (nDel) return `${teile.join(', ')} ${summe === 1 ? 'wird' : 'werden'} übernommen, ${nDel} gelöscht`;
   if (!teile.length) return 'Nichts zu übernehmen';
   return `${teile.join(', ')} ${summe === 1 ? 'wird' : 'werden'} übernommen`;
 }
@@ -304,6 +317,9 @@ export async function uebernehmen(norm, db) {
     const { datum, ...felder } = row;
     await db.patch('tageswerte', datum, { datum, ...felder });
     n++;
+  }
+  for (const [tab, ids] of Object.entries(norm.loeschen || {})) {
+    for (const id of ids) { await db.remove(tab, id); n++; }
   }
   return n;
 }
