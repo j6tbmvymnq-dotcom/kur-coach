@@ -1,5 +1,5 @@
 // Kur-Coach Service Worker: Precache, stale-while-revalidate, nie Supabase cachen
-const CACHE_VERSION = 'v13';
+const CACHE_VERSION = 'v14';
 const CACHE = `kur-coach-${CACHE_VERSION}`;
 
 // Liste pflegen, wenn Dateien dazukommen (z. B. gym.js in M2). Fehlende Dateien blockieren die Installation nicht.

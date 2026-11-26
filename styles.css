@@ -285,3 +285,13 @@ body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) 
 /* Kein Zoom: Doppeltipp aus, Eingabefelder >= 16 px (sonst zoomt iOS beim Fokussieren) */
 html { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 input, textarea, select { font-size: max(16px, 1em); }
+
+/* Navigation: fest am unteren Rand, springt nicht (Seite immer mindestens bildschirmhoch) */
+:root { --nav-h: 56px; --nav-unten: max(6px, calc(var(--sa-bottom) - 14px)); }
+html { height: 100%; }
+body { min-height: 100vh; min-height: 100dvh; }
+#nav { padding-bottom: var(--nav-unten); }
+#main { padding-bottom: calc(var(--nav-h) + var(--nav-unten) + 24px); }
+.toast { bottom: calc(var(--nav-h) + var(--nav-unten) + 16px); }
+.pause-leiste { bottom: calc(var(--nav-h) + var(--nav-unten)); }
+body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) + var(--nav-unten) + 96px); }
