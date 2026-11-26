@@ -68,6 +68,11 @@ export function parseKurlog(text) {
   const treffer = [];
   let m;
   while ((m = re.exec(t)) !== null) treffer.push(m.index + m[0].length);
+  // Ohne Kopfzeile: reines JSON mit bekannten Listen akzeptieren (Claude lässt „KURLOG v1“ manchmal weg)
+  if (!treffer.length && /"(mahlzeiten|messungen|trainings|termine|schritte|tag)"\s*:/.test(t2)) {
+    const i = t2.indexOf('{');
+    if (i >= 0) treffer.push(i);
+  }
   if (!treffer.length) {
     return { ok: false, daten: null, fehler: 'Kein KURLOG-Block gefunden. Der Text muss „KURLOG v1“ enthalten, direkt gefolgt vom JSON in geschweiften Klammern.' };
   }

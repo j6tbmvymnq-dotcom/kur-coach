@@ -170,7 +170,7 @@ export function kurlogSheet() {
     function zeichneAktion(bereit) {
       aktion.replaceChildren(
         h('button', { type: 'button', class: 'btn', onclick: pruefen }, 'Prüfen'),
-        bereit ? h('button', { type: 'button', class: 'btn primaer', onclick: (e) => uebernehmenKlick(e.currentTarget) }, 'Übernehmen') : null);
+        ...(bereit ? [h('button', { type: 'button', class: 'btn primaer', onclick: (e) => uebernehmenKlick(e.currentTarget) }, 'Übernehmen')] : []));
     }
     ta.addEventListener('input', () => { if (norm) { norm = null; vorschau.hidden = true; zeichneAktion(false); } });
     zeichneAktion(false);

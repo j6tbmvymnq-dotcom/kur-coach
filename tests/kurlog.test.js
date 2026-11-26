@@ -45,6 +45,9 @@ export default function (t) {
   const r6 = parseKurlog('Erst:\nKURLOG v1\n{"mahlzeiten":[{"id":"a","datum":"2026-11-29"}]}\nDann:\nKURLOG v1\n{"mahlzeiten":[{"id":"b","datum":"2026-11-29"}],"tag":{"datum":"2026-11-29","notiz":"x"}}');
   t.wahr(r6.ok && r6.daten.mahlzeiten.length === 2 && r6.daten.tag.length === 1, 'Mehrere Blöcke werden gemerged');
 
+  const r7 = parseKurlog('{\n "version": 1,\n "mahlzeiten": [{"id":"a","datum":"2026-11-26","kcal":5}]\n}');
+  t.wahr(r7.ok && r7.daten.mahlzeiten[0].id === 'a', 'Reines JSON ohne KURLOG-Kopfzeile wird gelesen');
+
   const f1 = parseKurlog('Hallo, nichts hier');
   t.wahr(!f1.ok && /KURLOG/.test(f1.fehler), 'Fehler ohne KURLOG-Marker (deutsch)');
   const f2 = parseKurlog('KURLOG v1\n{"mahlzeiten":[{"id":"a"');
