@@ -3,7 +3,8 @@ import * as db from '../db.js';
 import * as gym from '../gym.js';
 import * as calc from '../calc.js';
 import { icon } from './icons.js';
-import { h, zf1, toast, fehlerText } from './util.js';
+import { h, zf1, toast, fehlerText, kopiere } from './util.js';
+import { trainingsExportAusDb, planZuruecksetzen } from '../plan.js';
 import { ladeReadiness } from './daten.js';
 import { zeigeSession } from './studio-sess.js';
 import { zeigeEnde } from './studio-ende.js';
@@ -82,6 +83,29 @@ async function zeigeStart(S) {
       h('span', { html: icon('play', 22) }), ` ${v.name}${key === naechste ? ' – als Nächstes' : ''}`);
   });
 
+  const profil = await d.get('profil', 'me');
+  const plan = profil?.einstellungen?.plan;
+  const exportKopieren = async () => {
+    try {
+      const text = await trainingsExportAusDb(d);
+      toast((await kopiere(text)) ? 'Trainingsdaten kopiert – im Claude-Projekt einfügen' : 'Kopieren nicht möglich');
+    } catch (e) { toast('Export fehlgeschlagen: ' + fehlerText(e)); }
+  };
+  const zuruecksetzen = async () => {
+    if (!confirm('Plan-Anpassungen verwerfen und den Grundplan wiederherstellen?')) return;
+    await planZuruecksetzen(d);
+    toast('Grundplan wiederhergestellt');
+    const k = await gym.ladeUebungen(d); S.vorlagen = k.vorlagen;
+    zeigeStart(S);
+  };
+  const letzteAenderung = plan?.verlauf?.[plan.verlauf.length - 1];
+  const planKarte = h('div', { class: 'karte' },
+    h('div', { class: 'klein-titel' }, 'Plan prüfen lassen'),
+    h('p', { class: 'muted' }, 'Kopiert alle Trainings, Sätze und Erholungswerte. Im Claude-Projekt einfügen, die Antwort (KURLOG mit Plan) unter „KURLOG importieren“ übernehmen.'),
+    h('button', { type: 'button', class: 'btn gross', onclick: exportKopieren }, h('span', { html: icon('copy', 22) }), ' Trainingsdaten kopieren'),
+    plan?.stand ? h('p', { class: 'muted' }, `Plan angepasst am ${datumDe(plan.stand.slice(0, 10))}` + (letzteAenderung?.aenderungen?.length ? ': ' + letzteAenderung.aenderungen.join(' · ') : '')) : null,
+    plan?.stand ? h('button', { type: 'button', class: 'btn', onclick: zuruecksetzen }, 'Grundplan wiederherstellen') : null);
+
   let rot = false;
   try { rot = (await ladeReadiness()).ampel === 'rot'; } catch { rot = false; }
   const seite = h('div', { class: 'spalte' },
@@ -107,6 +131,7 @@ async function zeigeStart(S) {
         ? h('ul', { class: 'edit-liste' }, ...best.map((b) => h('li', { class: 'best-zeile' },
           h('div', { class: 'best-text' }, h('strong', null, b.name), h('span', { class: 'muted' }, `${zf1(b.best)} kg`)),
           liniendiagramm(b.verlauf))))
-        : h('p', { class: 'leer' }, 'Sobald du Sätze erfasst hast, erscheinen hier deine Bestwerte.')));
+        : h('p', { class: 'leer' }, 'Sobald du Sätze erfasst hast, erscheinen hier deine Bestwerte.')),
+    planKarte);
   S.zeige(seite);
 }

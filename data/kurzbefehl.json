@@ -26,6 +26,10 @@
       "text": "Typ Gewicht bzw. Körperfettanteil, Startdatum in den letzten 7 Tagen, Sortieren nach Startdatum (Neueste zuerst), Beschränken auf 1, Gruppieren: Ohne. Dann „Details von Health-Messungen abrufen“: Wert und Startdatum. p_datum = Startdatum formatiert yyyy-MM-dd (nicht das aktuelle Datum!), p_werte: gewicht bzw. kfa (Text) = Wert, gewicht_zeit (Text) = Startdatum formatiert HH:mm. Vor 10 Uhr gewogen zählt als nüchtern. Da immer ein Wert der letzten 7 Tage gefunden wird, bricht dieser Kurzbefehl nicht ab."
     },
     {
+      "titel": "5c. Training (HS Training)",
+      "text": "Für Schwimmen, Aqua, Rad, Nordic Walking, Kurse – nicht für Krafttraining (das erfasst der Gym-Logger). a) „Aus Menü auswählen“ (Frage: Was hast du trainiert?) mit Schwimmen, Aqua-Fitness, Rad, Nordic Walking, Gehen, Kurs, Yoga; in jedem Zweig nur eine „Text“-Aktion mit dem Schlüssel: schwimmen, aquagym, rad_indoor, nordic_walking, gehen, kurs, yoga. Danach „Variable konfigurieren“ Art = Menüergebnis. b) „Nach Eingabe fragen“ (Zahl, Wie viele Minuten?) → Variable Minuten. c) „Health-Messungen suchen“: Aktivitätsenergie, Startdatum ist in den letzten [Minuten] Minuten, Gruppieren: Ohne → „Statistik berechnen: Summe“ → Variable Kcal. d) „Datum anpassen“: Aktuelles Datum, Minuten subtrahieren = Minuten → zweimal „Datum formatieren“: yyyy-MM-dd (p_datum) und HH:mm (Start). e) POST wie oben, p_werte (alle Text): training_art = Art, training_min = Minuten, training_start = Start, training_kcal = Kcal. Gleiche Startzeit überschreibt statt doppelt zu speichern. Automation (zu prüfen): Kurzbefehle → Automation → „Apple Watch-Training“ → „Endet“ → HS Training ausführen."
+    },
+    {
       "titel": "6. Hinweise",
       "text": "Bei gesperrtem iPhone kann iOS keine Health-Daten lesen – Automationen nach Uhrzeit liefern dann evtl. nichts. Zuverlässig ist der Lauf beim Entsperren bzw. beim Öffnen der App über den Kurzbefehl. „Ergebnis anzeigen“ nach dem Testen entfernen. Erfolg prüfen: hier „Zuletzt empfangen“ bzw. auf Heute „Health zuletzt“."
     }

@@ -35,9 +35,11 @@ export function mergeKatalog(basis = [], overrides = []) {
 
 export async function ladeUebungen(db) {
   const k = await ladeKatalog();
-  const ov = await db.all('uebungen');
+  const [ov, profil] = await Promise.all([db.all('uebungen'), db.get('profil', 'me')]);
   const liste = mergeKatalog(k.uebungen, ov);
-  return { liste, map: new Map(liste.map((u) => [u.id, u])), vorlagen: k.vorlagen || {} };
+  // Planänderungen aus dem Claude-Projekt (KURLOG "plan") überschreiben einzelne Vorlagen
+  const planVorlagen = profil?.einstellungen?.plan?.vorlagen || {};
+  return { liste, map: new Map(liste.map((u) => [u.id, u])), vorlagen: { ...(k.vorlagen || {}), ...planVorlagen } };
 }
 
 /** Zeile für db.put('uebungen', …): Katalogwerte + bestehender Override + Änderungen, nur Tabellenspalten */

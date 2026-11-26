@@ -69,7 +69,7 @@ export function parseKurlog(text) {
   let m;
   while ((m = re.exec(t)) !== null) treffer.push(m.index + m[0].length);
   // Ohne Kopfzeile: reines JSON mit bekannten Listen akzeptieren (Claude lässt „KURLOG v1“ manchmal weg)
-  if (!treffer.length && /"(mahlzeiten|messungen|trainings|termine|schritte|tag)"\s*:/.test(t2)) {
+  if (!treffer.length && /"(mahlzeiten|messungen|trainings|termine|schritte|tag|plan)"\s*:/.test(t2)) {
     const i = t2.indexOf('{');
     if (i >= 0) treffer.push(i);
   }
@@ -275,6 +275,7 @@ export function normalisiere(daten) {
     mische(datum, { schritte: n }, null);
   });
   out.tageswerte = [...tw.values()];
+  if (istObj(d.plan)) out.plan = d.plan; // wird in der Oberfläche gegen den Katalog geprüft (plan.js)
   return out;
 }
 
@@ -289,6 +290,7 @@ export function vorschauText(norm) {
     const n = norm?.[k]?.length || 0;
     if (n > 0) { teile.push(`${n} ${n === 1 ? s : p}`); summe += n; }
   }
+  if (norm?.plan) { teile.push('Planänderung'); summe += 1; }
   if (!teile.length) return 'Nichts zu übernehmen';
   return `${teile.join(', ')} ${summe === 1 ? 'wird' : 'werden'} übernommen`;
 }

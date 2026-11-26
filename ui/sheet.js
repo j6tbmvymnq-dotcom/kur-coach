@@ -3,6 +3,8 @@ import * as db from '../db.js';
 import * as calc from '../calc.js';
 import { parseKurlog, normalisiere, vorschauText, uebernehmen } from '../kurlog.js';
 import { baueKurkontext } from './daten.js';
+import * as gym from '../gym.js';
+import { pruefePlan, speicherePlan } from '../plan.js';
 import { icon } from './icons.js';
 import { h, toast, kopiere, fehlerText, zfEingabe, hhmm, pad2 } from './util.js';
 
@@ -134,7 +136,7 @@ export function kurlogSheet() {
     const aktion = h('div', { class: 'btn-reihe' });
     let norm = null;
 
-    const pruefen = () => {
+    const pruefen = async () => {
       zeigeFehler(fb, '');
       vorschau.hidden = true;
       norm = null;
@@ -148,8 +150,20 @@ export function kurlogSheet() {
       }
       try { norm = normalisiere(res.daten); } catch (e) { zeigeFehler(fb, 'KURLOG ist unvollständig: ' + fehlerText(e)); return; }
       const warn = alsListe(norm.warnungen);
+      let planTeile = [];
+      if (norm.plan) {
+        try {
+          const k = await gym.ladeUebungen(db);
+          norm.planGeprueft = pruefePlan(norm.plan, k.map, k.vorlagen);
+          warn.push(...norm.planGeprueft.warnungen);
+          planTeile = [h('p', null, h('strong', null, 'Planänderung')),
+            h('ul', { class: 'plan-aenderungen' }, ...norm.planGeprueft.aenderungen.map((a) => h('li', null, a))),
+            norm.planGeprueft.begruendung ? h('p', { class: 'muted' }, norm.planGeprueft.begruendung) : null].filter(Boolean);
+        } catch (e) { zeigeFehler(fb, 'Planänderung konnte nicht geprüft werden: ' + fehlerText(e)); norm = null; return; }
+      }
       vorschau.replaceChildren(
         h('pre', { class: 'vorschau-text' }, vorschauText(norm)),
+        ...planTeile,
         ...warn.map((w) => h('p', { class: 'warnung' }, h('span', { html: icon('alert', 18) }), ' ', String(w))));
       vorschau.hidden = false;
       zeichneAktion(true);
@@ -159,7 +173,8 @@ export function kurlogSheet() {
       btn.disabled = true;
       try {
         await uebernehmen(norm, db);
-        toast('KURLOG übernommen');
+        if (norm.planGeprueft) await speicherePlan(norm.planGeprueft, db);
+        toast(norm.planGeprueft ? 'KURLOG und Plan übernommen' : 'KURLOG übernommen');
         close();
       } catch (e) {
         btn.disabled = false;

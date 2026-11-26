@@ -39,7 +39,7 @@ function zeitleiste(d, starts) {
   for (const t of d.trainings) {
     let min = null, zeit = null;
     if (t.start) { const dt = new Date(t.start); if (!isNaN(dt)) { min = dt.getHours() * 60 + dt.getMinutes(); zeit = hhmm(dt); } }
-    eintraege.push({ min, art: t.art === 'sauna' ? 'sauna' : 'training', titel: t.titel || t.art || 'Training', sub: t.minuten ? `${t.minuten} min` : '', zeit });
+    eintraege.push({ min, art: t.art === 'sauna' ? 'sauna' : 'training', titel: t.titel || t.art || 'Training', sub: [t.minuten ? `${t.minuten} min` : null, t.kcal_watch ? `${t.kcal_watch} kcal` : null, t.quelle === 'apple-health' ? 'Health' : null].filter(Boolean).join(' · '), zeit });
   }
   for (const m of d.mahlzeiten) {
     eintraege.push({ min: calc.zeitZuMin(m.zeit), art: 'essen', titel: m.beschreibung || m.typ || 'Mahlzeit', sub: m.kcal != null ? `${zf(calc.zahl(m.kcal))} kcal` : '', zeit: m.zeit?.slice(0, 5) });
