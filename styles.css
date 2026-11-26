@@ -281,3 +281,7 @@ body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) 
 .kb-zeile { display: flex; flex-direction: column; gap: 2px; margin-top: 8px; }
 .kb-schritte { padding-left: 20px; }
 
+
+/* Kein Zoom: Doppeltipp aus, Eingabefelder >= 16 px (sonst zoomt iOS beim Fokussieren) */
+html { touch-action: manipulation; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+input, textarea, select { font-size: max(16px, 1em); }
