@@ -75,7 +75,7 @@ body.ohne-nav #main { padding-bottom: calc(var(--sa-bottom) + 24px); }
 .feld { display: flex; flex-direction: column; gap: 6px; }
 .feld-label { font-size: 14px; color: var(--muted); }
 .feld-hinweis { font-size: 13px; color: var(--muted); }
-input[type=text], input[type=email], input[type=date], input[type=time], input[type=number], textarea {
+input[type=text], input[type=email], input[type=password], input[type=date], input[type=time], input[type=number], textarea {
   width: 100%; min-height: 52px; padding: 10px 14px; border-radius: 12px; border: 1px solid var(--linie); background: var(--bg);
   color: var(--text); font: inherit; font-size: 17px;   /* >=16px verhindert iOS-Zoom */
 }

@@ -106,6 +106,7 @@ function statusZeichnen(s) {
   else if (s.fehler) { text = 'Sync-Fehler – tippen zum Wiederholen'; art = 'fehler'; }
   else if (!s.online) { text = s.offen ? `Offline – ${s.offen} offen` : 'Offline'; art = 'offline'; }
   else if (s.offen > 0) { text = `${s.offen} offen – tippen zum Senden`; art = 'offen'; }
+  else if (s.angemeldet === false) { text = 'Nicht angemeldet'; art = 'offline'; }
   else { text = 'Synchron'; art = 'ok'; }
   b.className = `status ${art}`;
   b.replaceChildren(h('span', { html: icon(art === 'offline' ? 'cloudoff' : art === 'fehler' ? 'alert' : 'cloud', 16) }), ' ', text);
