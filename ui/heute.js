@@ -64,7 +64,7 @@ function werteSheet(d) {
     const t = d.tag || {};
     const schlaf = zahlInput(t.schlaf_min != null ? calc.runde(t.schlaf_min / 60, 1) : null, { platzhalter: 'z. B. 7,5' });
     const puls = zahlInput(t.ruhepuls, { ganz: true, platzhalter: 'Schläge/min' });
-    const hrv = zahlInput(t.hrv_ms, { ganz: true, platzhalter: 'ms' });
+    const hrv = zahlInput(t.hrv_ms != null ? Math.round(t.hrv_ms) : null, { ganz: true, platzhalter: 'ms' });
     const energie = zahlInput(t.energie_1_5, { ganz: true, platzhalter: '1 bis 5' });
     const fb = h('p', { class: 'fehler', role: 'alert', hidden: true });
     const speichern = async () => {
