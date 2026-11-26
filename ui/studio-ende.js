@@ -1,5 +1,6 @@
 // Studio: Zusammenfassung nach "Training beenden"
 import * as gym from '../gym.js';
+import * as calc from '../calc.js';
 import { icon } from './icons.js';
 import { h, zf, zf1, toast, kopiere, fehlerText } from './util.js';
 import { sheet } from './sheet.js';
@@ -15,6 +16,38 @@ function vergleich(u) {
   const dv = u.heute.volumen - u.letzte.volumen;
   const vz = dv === 0 ? 'Volumen gleich' : `Volumen ${dv > 0 ? '+' : '−'}${zf(Math.abs(dv))} kg`;
   return `${top} (zuletzt ${zf1(u.letzte.topGewicht)} kg × ${u.letzte.topWdh}) · ${vz}`;
+}
+
+const KURS_RE = /yoga|faszien|rücken|ruecken|stretch|mobil|pilates/i;
+
+/** Karte "Abdehnen"; null, wenn die Daten fehlen (Fehler still ignoriert) */
+async function dehnKarte(S, training) {
+  let dd, kurs = null;
+  try { const r = await fetch('./data/dehnen.json'); if (!r.ok) return null; dd = await r.json(); } catch { return null; }
+  try {
+    const termine = await S.db.byDatum('termine', calc.isoDatum());
+    kurs = termine.find((t) => KURS_RE.test(`${t.titel || ''} ${t.kategorie || ''}`)) || null;
+  } catch { kurs = null; }
+  const vl = String(training.vorlage || '');
+  const gruppen = vl.startsWith('ok') ? ['oberkoerper'] : vl.startsWith('uk') ? ['unterkoerper'] : ['oberkoerper', 'unterkoerper'];
+  const zeile = (e) => {
+    const li = h('li', { class: 'dehn-zeile' }, h('strong', null, e.name), h('span', { class: 'muted' }, ` ${e.ziel} · ${e.dauer}`));
+    li.setAttribute('role', 'button'); li.tabIndex = 0;
+    const tog = () => li.classList.toggle('erledigt');
+    li.addEventListener('click', tog);
+    li.addEventListener('keydown', (ev) => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); tog(); } });
+    return li;
+  };
+  const liste = (nurKurz) => h('ul', { class: 'edit-liste' }, ...gruppen.flatMap((g) => (dd[g] || [])
+    .filter((_, i) => !nurKurz || (dd.kurz?.[g] || []).includes(i)).map(zeile)));
+  const karte = h('div', { class: 'karte' }, h('div', { class: 'klein-titel' }, 'Abdehnen (ca. 5 min)'));
+  if (kurs) {
+    const box = h('div', null, liste(true));
+    const knopf = h('button', { type: 'button', class: 'btn klein', onclick: () => { box.replaceChildren(liste(false)); knopf.remove(); } }, 'Alle anzeigen');
+    karte.append(h('p', null, `Heute steht noch ${kurs.titel || 'ein Kurs'} an – dort wird gedehnt. Hier reicht:`), box, knopf);
+  } else karte.append(liste(false));
+  karte.append(h('p', { class: 'muted klein-text' }, dd.hinweis || ''));
+  return karte;
 }
 
 export async function zeigeEnde(S, training) {
@@ -42,6 +75,7 @@ export async function zeigeEnde(S, training) {
     });
   };
 
+  const dehnen = await dehnKarte(S, training);
   const kachel = (wert, label) => h('div', { class: 'kachel' }, h('strong', null, wert), h('span', { class: 'muted' }, label));
   S.zeige(h('div', { class: 'spalte' },
     h('h1', { class: 'titel gross' }, 'Geschafft'),
@@ -56,6 +90,7 @@ export async function zeigeEnde(S, training) {
     h('div', { class: 'karte' },
       h('div', { class: 'klein-titel' }, 'Vergleich zur letzten Einheit'),
       h('ul', { class: 'edit-liste' }, ...z.uebungen.map((u) => h('li', { class: 'vgl-zeile' }, h('strong', null, u.name), h('span', { class: 'muted' }, vergleich(u)))))),
+    dehnen,
     h('div', { class: 'btn-reihe' },
       h('button', { type: 'button', class: 'btn gross', onclick: kopieren }, h('span', { html: icon('copy', 22) }), ' Als Text kopieren'),
       h('button', { type: 'button', class: 'btn primaer gross', onclick: S.zumStart }, 'Zur Übersicht'))));

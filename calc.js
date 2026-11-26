@@ -406,13 +406,23 @@ export function aufSchritt(gewicht, schritt = 2.5, modus = 'ab') {
   return runde(f(gewicht / s + 1e-9) * s, 2);
 }
 
+/** Aufwärm-Schemata je Modus: [Anteil vom Arbeitsgewicht, Wdh.] (Ribeiro 2020, docs/gym-logger.md) */
+export const AUFWAERM_MODI = {
+  'grund-erst': [[0.5, 8], [0.7, 4], [0.85, 2]],
+  'grund-folge': [[0.65, 5]],
+  'iso-erst': [[0.5, 10], [0.75, 4]],
+  'iso-folge': [[0.55, 8]],
+};
+
 /**
- * Aufwärmsätze. nurEiner: ab der 3. Übung derselben Muskelgruppe nur 1 Satz (~60 %).
+ * Aufwärmsätze nach Übungstyp. modus: 'grund-erst' | 'grund-folge' | 'iso-erst' | 'iso-folge'
+ * (true -> 'grund-folge', false/undefined -> 'grund-erst').
  * -> [{typ:'aufwaermen', gewicht, wdh, prozent}]
  */
-export function aufwaermsaetze(arbeitsgewicht, schritt = 2.5, nurEiner = false) {
+export function aufwaermsaetze(arbeitsgewicht, schritt = 2.5, modus = 'grund-erst') {
   if (!arbeitsgewicht || arbeitsgewicht <= 0) return [];
-  const plan = nurEiner ? [[0.6, 6]] : [[0.4, 10], [0.6, 6], [0.8, 3]];
+  if (modus === true) modus = 'grund-folge';
+  const plan = AUFWAERM_MODI[modus] || AUFWAERM_MODI['grund-erst'];
   const out = [];
   for (const [p, wdh] of plan) {
     const g = aufSchritt(arbeitsgewicht * p, schritt, 'nah');

@@ -315,3 +315,6 @@ body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) 
 .tab.kv td { text-align: right; white-space: normal; }
 .ampel-zeile { display: flex; align-items: center; gap: 10px; }
 .ampel-zeile .btn { margin-left: auto; min-height: 44px; padding: 8px 16px; }
+
+.dehn-zeile { cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.dehn-zeile.erledigt { opacity: .55; text-decoration: line-through; }

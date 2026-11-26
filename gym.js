@@ -109,13 +109,14 @@ export async function historie(db, uebungId, ausserId = null) {
 }
 
 // ---------------------------------------------------------------- Plan / Aufwärmen
-/** Anzahl vorheriger Übungen derselben Kategorie -> ab der 3. nur 1 Aufwärmsatz */
-export function nurEinerAufwaermen(plan, index, katalogMap) {
-  const kat = katalogMap.get(plan[index]?.uebung_id)?.kategorie;
-  if (!kat) return false;
-  let n = 0;
-  for (let i = 0; i < index; i++) if (katalogMap.get(plan[i].uebung_id)?.kategorie === kat) n++;
-  return n >= 2;
+/** Aufwärm-Modus: Typ (Grund/Isolation) + erste Übung der Kategorie im Plan oder Folgeübung */
+export function aufwaermModus(plan, index, katalogMap) {
+  const u = katalogMap.get(plan[index]?.uebung_id);
+  const iso = u?.typ === 'isolation' ? 'iso' : 'grund';
+  const kat = u?.kategorie;
+  let folge = false;
+  if (kat) for (let i = 0; i < index; i++) if (katalogMap.get(plan[i].uebung_id)?.kategorie === kat) { folge = true; break; }
+  return `${iso}-${folge ? 'folge' : 'erst'}`;
 }
 
 /** Übungsliste eines Trainings: gespeicherter Plan (extra.plan) oder Vorlage, plus Übungen, die nur in Sätzen vorkommen */
@@ -161,12 +162,15 @@ export function vorschlagFuer(uebung, einheiten, readiness = null, vorlagenSaetz
  * erledigt: Sätze dieser Übung in diesem Training. extra: zusätzliche Arbeitssätze ("+ Satz").
  * -> [{typ, nr, gewicht, wdh, erledigt: Satz|null}]
  */
-export function zeilen({ uebung, vorschlag: v, nurEiner = false, erledigt = [], extra = 0 }) {
+export function zeilen({ uebung, vorschlag: v, modus = 'grund-erst', erledigt = [], extra = 0 }) {
   const fertig = erledigt.filter((s) => !s.geloescht);
   const doneWarm = fertig.filter((s) => s.typ === 'aufwaermen');
   const doneArb = fertig.filter((s) => s.typ !== 'aufwaermen');
-  const warm = (!istCardio(uebung) && !ohneGewicht(uebung) && v.gewicht)
-    ? calc.aufwaermsaetze(v.gewicht, uebung.schrittweite_kg || 2.5, nurEiner) : [];
+  const mitGewicht = !istCardio(uebung) && !ohneGewicht(uebung);
+  // Erstes Mal ohne bekanntes Gewicht: ein leichter Technik-Satz (Steigerungs-Hinweis in der Übungsansicht)
+  const warm = mitGewicht && v.gewicht
+    ? calc.aufwaermsaetze(v.gewicht, uebung.schrittweite_kg || 2.5, modus)
+    : mitGewicht ? [{ typ: 'aufwaermen', gewicht: null, wdh: 10, prozent: null }] : [];
   const out = [];
   const nWarm = Math.max(warm.length, ...doneWarm.map((s) => s.satz_nr || 0), 0);
   for (let i = 1; i <= nWarm; i++) {

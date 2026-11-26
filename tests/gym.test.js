@@ -1,4 +1,4 @@
-import { mergeKatalog, ueberschreibung, baueHistorie, historie, nurEinerAufwaermen, planAus, zeilen, vorschlagFuer,
+import { mergeKatalog, ueberschreibung, baueHistorie, historie, aufwaermModus, planAus, zeilen, vorschlagFuer,
   laufendesTraining, startTraining, beendeTraining, speichereSatz, zusammenfassung, trainingsText, bestwerteListe } from '../gym.js';
 
 function fakeDb(start = {}) {
@@ -61,11 +61,12 @@ export default async function (t) {
   t.gleich((await historie(dbH, 'a', 't3')).length, 2, 'historie() über Fake-db');
   t.gleich((await historie(dbH, 'zzz')).length, 0, 'unbekannte Übung leer');
 
-  t.gruppe('Gym: nurEiner-Zähler');
-  const plan = [{ uebung_id: 'a' }, { uebung_id: 'd' }, { uebung_id: 'b' }, { uebung_id: 'c' }];
-  const km = new Map(KAT.map((u) => [u.id, u]));
-  t.gleich([0, 1, 2, 3].map((i) => nurEinerAufwaermen(plan, i, km)), [false, false, false, true], 'ab der 3. Übung derselben Kategorie');
-  t.gleich(nurEinerAufwaermen([{ uebung_id: 'zzz' }], 0, km), false, 'unbekannte Übung');
+  t.gruppe('Gym: Aufwärm-Modus');
+  const km = new Map([...KAT, { id: 'lat', kategorie: 'ruecken', typ: 'grund' }, { id: 'rud', kategorie: 'ruecken', typ: 'grund' }, { id: 'seit', kategorie: 'schulter', typ: 'isolation' }].map((u) => [u.id, u]));
+  const plan = [{ uebung_id: 'lat' }, { uebung_id: 'rud' }, { uebung_id: 'seit' }];
+  t.gleich([0, 1, 2].map((i) => aufwaermModus(plan, i, km)), ['grund-erst', 'grund-folge', 'iso-erst'], 'Modus je Übung im Plan');
+  t.gleich(aufwaermModus([{ uebung_id: 'a' }, { uebung_id: 'b' }], 1, km), 'iso-folge', 'Isolation, Kategorie schon vorher');
+  t.gleich(aufwaermModus([{ uebung_id: 'zzz' }], 0, km), 'grund-erst', 'unbekannte Übung');
 
   t.gruppe('Gym: Plan und Zeilen');
   const vorl = { 'kraft-a': { name: 'Kraft A', uebungen: [{ id: 'a', saetze: 3 }, { id: 'd', saetze: 2 }] } };
@@ -77,14 +78,15 @@ export default async function (t) {
   const vErst = vorschlagFuer(KAT[0], [], null, 3);
   t.gleich(vErst.gewicht, null, 'erstes Mal: kein Gewicht');
   const zErst = zeilen({ uebung: KAT[0], vorschlag: vErst });
-  t.gleich(zErst.length, 3, 'erstes Mal: keine Aufwärmsätze, 3 Arbeitssätze');
+  t.gleich(zErst.length, 4, 'erstes Mal: 1 Technik-Zeile + 3 Arbeitssätze');
+  t.gleich([zErst[0].typ, zErst[0].gewicht, zErst[0].wdh], ['aufwaermen', null, 10], 'erstes Mal ohne Gewicht: Aufwärmzeile gewicht null, 10 Wdh.');
   const einh = [[sz('1', 'x', 'a', 'arbeit', 1, 100, 12, 1), sz('2', 'x', 'a', 'arbeit', 2, 100, 12, 1), sz('3', 'x', 'a', 'arbeit', 3, 100, 12, 2)]];
   const v2 = vorschlagFuer(KAT[0], einh, null, 3);
   t.gleich(v2.gewicht, 105, 'Vorschlag: alle oben -> +Schritt');
   const z2 = zeilen({ uebung: KAT[0], vorschlag: v2 });
-  t.gleich(z2.filter((r) => r.typ === 'aufwaermen').length, 3, 'drei Aufwärmsätze');
+  t.gleich(z2.filter((r) => r.typ === 'aufwaermen').length, 3, 'drei Aufwärmsätze (grund-erst)');
   t.gleich(z2.filter((r) => r.typ === 'arbeit').length, 3, 'drei Arbeitssätze');
-  t.gleich(zeilen({ uebung: KAT[0], vorschlag: v2, nurEiner: true }).filter((r) => r.typ === 'aufwaermen').length, 1, 'nurEiner: 1 Aufwärmsatz');
+  t.gleich(zeilen({ uebung: KAT[0], vorschlag: v2, modus: 'grund-folge' }).filter((r) => r.typ === 'aufwaermen').length, 1, 'grund-folge: 1 Aufwärmsatz');
   const z3 = zeilen({ uebung: KAT[0], vorschlag: v2, erledigt: [sz('s', 'tx', 'a', 'arbeit', 1, 107.5, 8, null)], extra: 1 });
   t.gleich(z3.filter((r) => r.typ === 'arbeit').length, 4, '+ Satz erhöht Anzahl');
   t.wahr(z3.find((r) => r.typ === 'arbeit' && r.nr === 1).erledigt, 'erledigter Satz verknüpft');

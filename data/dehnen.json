@@ -1,0 +1,18 @@
+{
+  "hinweis": "Je Dehnung 2 × 30–45 s, leichtes Ziehen, kein Schmerz, ruhig atmen. Dient der Beweglichkeit – gegen Muskelkater hilft Dehnen nicht (Herbert 2011).",
+  "oberkoerper": [
+    { "name": "Brustdehnung am Rack/Türrahmen", "ziel": "Brust, vordere Schulter", "dauer": "40 s je Seite" },
+    { "name": "Latdehnung am Pfosten", "ziel": "Latissimus", "dauer": "40 s je Seite" },
+    { "name": "Überkopf-Trizepsdehnung", "ziel": "Trizeps, Lat", "dauer": "30 s je Arm" },
+    { "name": "Arm-vor-der-Brust-Dehnung", "ziel": "hintere Schulter", "dauer": "30 s je Arm" },
+    { "name": "Nacken seitlich", "ziel": "oberer Trapez", "dauer": "30 s je Seite" }
+  ],
+  "unterkoerper": [
+    { "name": "Hüftbeuger im tiefen Ausfallschritt", "ziel": "Hüftbeuger, Quadrizeps", "dauer": "40 s je Seite" },
+    { "name": "Oberschenkel vorne im Stand", "ziel": "Quadrizeps", "dauer": "30 s je Seite" },
+    { "name": "Beinbeuger, Ferse auf der Bank", "ziel": "Beinbeuger", "dauer": "40 s je Seite" },
+    { "name": "Figur-4 im Sitzen auf der Bank", "ziel": "Gesäß", "dauer": "40 s je Seite" },
+    { "name": "Wade an der Wand", "ziel": "Wade", "dauer": "40 s je Seite" }
+  ],
+  "kurz": { "oberkoerper": [0], "unterkoerper": [0] }
+}

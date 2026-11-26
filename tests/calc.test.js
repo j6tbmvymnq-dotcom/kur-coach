@@ -213,14 +213,16 @@ export default function (t) {
 
   // ------------------------------------------------------------ Gym: Aufwärmen, Pausen
   t.gruppe('Gym: Aufwärmen und Pausen');
-  t.gleich(C.aufwaermsaetze(100, 2.5), [
-    { typ: 'aufwaermen', gewicht: 40, wdh: 10, prozent: 40 },
-    { typ: 'aufwaermen', gewicht: 60, wdh: 6, prozent: 60 },
-    { typ: 'aufwaermen', gewicht: 80, wdh: 3, prozent: 80 },
-  ], 'aufwaermsaetze 100 kg: 40/10, 60/6, 80/3');
-  t.gleich(C.aufwaermsaetze(100, 2.5, true), [
-    { typ: 'aufwaermen', gewicht: 60, wdh: 6, prozent: 60 },
-  ], 'aufwaermsaetze nurEiner: nur 60 kg');
+  const aw = (g, st, m) => C.aufwaermsaetze(g, st, m).map((x) => [x.gewicht, x.wdh]);
+  t.gleich(aw(100, 2.5, 'grund-erst'), [[50, 8], [70, 4], [85, 2]], 'grund-erst 100 kg: 50x8, 70x4, 85x2');
+  t.gleich(aw(100, 2.5, 'grund-folge'), [[65, 5]], 'grund-folge 100 kg: 65x5');
+  t.gleich(aw(100, 2.5, 'iso-erst'), [[50, 10], [75, 4]], 'iso-erst 100 kg: 50x10, 75x4');
+  t.gleich(aw(100, 2.5, 'iso-folge'), [[55, 8]], 'iso-folge 100 kg: 55x8');
+  t.gleich(aw(10, 1, 'grund-erst'), [[5, 8], [7, 4], [9, 2]], 'grund-erst 10 kg, Schritt 1');
+  t.gleich(aw(10, 1, 'iso-erst'), [[5, 10], [8, 4]], 'iso-erst 10 kg, Schritt 1');
+  t.gleich(aw(100, 2.5), aw(100, 2.5, 'grund-erst'), 'Standard = grund-erst');
+  t.gleich(aw(100, 2.5, true), aw(100, 2.5, 'grund-folge'), 'true = grund-folge (kompatibel)');
+  t.gleich(C.aufwaermsaetze(100, 2.5, 'grund-folge')[0].prozent, 65, 'Prozent im Objekt');
   t.gleich(C.aufwaermsaetze(0), [], 'aufwaermsaetze ohne Gewicht = leer');
   t.gleich(C.pausenDauer('aufwaermen'), 60, 'Pause Aufwärmen 60 s');
   t.gleich(C.pausenDauer('arbeit', 'isolation'), 90, 'Pause Isolation 90 s');

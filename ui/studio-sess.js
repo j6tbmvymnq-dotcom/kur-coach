@@ -8,6 +8,7 @@ import { ladeReadiness } from './daten.js';
 import { startPause, stoppe, timerWiederherstellen, wakeLockAn, wakeLockAus } from './studio-timer.js';
 
 const KATEGORIEN = { beine: 'Beine', ruecken: 'Rücken', brust: 'Brust', schulter: 'Schulter', arme: 'Arme', rumpf: 'Rumpf', cardio: 'Cardio' };
+const TECHNIK_HINWEIS = 'Erstes Mal: leichter Technik-Satz. Danach Satz für Satz um 5–10 % steigern (Isolation 2,5–5 %), bis 8–12 Wdh. mit 1–2 Wdh. Reserve gehen – ab diesem Gewicht zählen die Arbeitssätze.';
 const katName = (k) => KATEGORIEN[k] || k || 'Sonstige';
 
 export async function zeigeSession(S, training) {
@@ -33,7 +34,7 @@ export async function zeigeSession(S, training) {
     const u = uebungVon(p.uebung_id);
     const einheiten = (hist.get(u.id) || []).map((g) => g.saetze);
     const v = gym.vorschlagFuer(u, einheiten, readiness, p.saetze);
-    const rows = gym.zeilen({ uebung: u, vorschlag: v, nurEiner: gym.nurEinerAufwaermen(plan, i, S.katalog), erledigt: eigene(u.id), extra: extra[u.id] || 0 });
+    const rows = gym.zeilen({ uebung: u, vorschlag: v, modus: gym.aufwaermModus(plan, i, S.katalog), erledigt: eigene(u.id), extra: extra[u.id] || 0 });
     return { p, u, v, rows, einheiten };
   }
 
@@ -233,6 +234,17 @@ export async function zeigeSession(S, training) {
       h('span', { class: 'haken-klein leer' }), h('span', { class: 'satz-name' }, name), h('span', { class: 'satz-wert' }, wert));
   }
 
+  function allgemeinAufwaermen() {
+    const vl = String(training.vorlage || '');
+    const ok = vl.startsWith('ok'), uk = vl.startsWith('uk');
+    const zeile = (titel, text) => h('p', { class: 'klein-text' }, h('strong', null, titel + ': '), text);
+    return h('div', { class: 'karte' },
+      h('div', { class: 'klein-titel' }, 'Allgemein aufwärmen (5 min)'),
+      h('p', null, '3–5 min Rad oder Crosstrainer locker (leicht schwitzen, gut sprechen können), dann 1–2 min Gelenke mobilisieren:'),
+      !uk ? zeile('Oberkörper', 'Schulter- und Armkreisen, Band-Pull-Aparts') : null,
+      !ok ? zeile('Unterkörper', 'Hüftkreisen, Beinpendel, 10 Kniebeugen ohne Gewicht') : null);
+  }
+
   function zeichne() {
     const d = daten(idx);
     const { u, v, rows } = d;
@@ -245,6 +257,7 @@ export async function zeigeSession(S, training) {
       : ohne ? `${v.wdhMin}–${v.wdhMax}${u.einheit === 's' ? ' s' : ' Wdh.'}`
         : v.gewicht != null ? `${zf1(v.gewicht)} kg × ${v.wdhMin}–${v.wdhMax}` : 'Gewicht selbst wählen';
     const erstesMal = !letzte && !u.einstellung;
+    const technik = !cardio && !ohne && !v.gewicht;
     const arbeitFertig = rows.filter((r) => r.typ === 'arbeit').every((r) => r.erledigt);
 
     const kopf = h('div', { class: 'sess-kopf' },
@@ -262,7 +275,11 @@ export async function zeigeSession(S, training) {
         h('div', null, h('span', { class: 'muted' }, 'Letztes Mal: '), letztText || 'noch keine Daten'),
         h('div', null, h('span', { class: 'muted' }, 'Heute: '), h('strong', null, heuteText)),
         !cardio ? h('div', { class: 'muted klein-text' }, v.grund) : null,
-        v.hinweis ? h('div', { class: 'hinweis' }, v.hinweis) : null));
+        v.hinweis ? h('div', { class: 'hinweis' }, v.hinweis) : null,
+        technik ? h('div', { class: 'hinweis' }, TECHNIK_HINWEIS) : null));
+
+    const nochLeer = !saetze.some((s) => !s.geloescht);
+    const allg = nochLeer ? allgemeinAufwaermen() : null;
 
     const liste = h('div', { class: 'saetze' }, ...rows.map((r) => (aktivRow && r === aktivRow ? aktiveZeile(r, d) : kompakteZeile(r, d))));
 
@@ -277,7 +294,7 @@ export async function zeigeSession(S, training) {
         ? h('button', { type: 'button', class: 'btn gross ' + (arbeitFertig ? 'primaer' : ''), onclick: () => { idx++; aktivKey = null; zeichne(); } }, 'Nächste Übung')
         : h('button', { type: 'button', class: 'btn gross ' + (arbeitFertig ? 'primaer' : ''), onclick: beenden }, 'Training beenden'));
 
-    const inhalt = h('div', { class: 'studio-sess' }, kopf, karte, liste, mehr, unten);
+    const inhalt = h('div', { class: 'studio-sess' }, kopf, allg, karte, liste, mehr, unten);
     let x0 = 0, y0 = 0;
     inhalt.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive: true });
     inhalt.addEventListener('touchend', (e) => {
