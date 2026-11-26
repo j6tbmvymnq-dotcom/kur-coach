@@ -1,5 +1,5 @@
 // Kur-Coach Service Worker: Precache, stale-while-revalidate, nie Supabase cachen
-const CACHE_VERSION = 'v6';
+const CACHE_VERSION = 'v7';
 const CACHE = `kur-coach-${CACHE_VERSION}`;
 
 // Liste pflegen, wenn Dateien dazukommen (z. B. gym.js in M2). Fehlende Dateien blockieren die Installation nicht.
@@ -7,9 +7,9 @@ const PRECACHE = [
   './', './index.html', './app.js', './styles.css', './manifest.webmanifest',
   './config.js', './calc.js', './db.js', './kurlog.js', './gym.js',
   './vendor/supabase.js',
-  './data/checklisten.json', './data/evidenz.json', './data/uebungen.json',
+  './data/checklisten.json', './data/evidenz.json', './data/uebungen.json', './data/freizeit.json',
   './ui/icons.js', './ui/util.js', './ui/daten.js', './ui/sheet.js', './ui/profilform.js',
-  './ui/login.js', './ui/onboarding.js', './ui/heute.js', './ui/checkliste.js', './ui/studio.js', './ui/studio-sess.js', './ui/studio-timer.js', './ui/studio-ende.js', './ui/einstellungen.js',
+  './ui/login.js', './ui/onboarding.js', './ui/heute.js', './ui/checkliste.js', './ui/studio.js', './ui/studio-sess.js', './ui/studio-timer.js', './ui/studio-ende.js', './ui/einstellungen.js', './ui/freizeit.js',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
 ];
 

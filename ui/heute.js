@@ -4,6 +4,7 @@ import { icon } from './icons.js';
 import { h, zf, minZuHhmm, hhmm } from './util.js';
 import { ladeTag, slotStarts, zuWenigWarnung, ZIEL_TRAINING_MIN } from './daten.js';
 import { schritteSheet, wiegenSheet, kurlogSheet, tagesstartKopieren } from './sheet.js';
+import { tipp as freizeitTipp } from './freizeit.js';
 
 function ring({ wert, ziel, farbe, label, gross, klein }) {
   const r = 42, u = 2 * Math.PI * r;
@@ -30,7 +31,9 @@ function zeitleiste(d, starts) {
   const nowMin = jetzt.getHours() * 60 + jetzt.getMinutes();
   const eintraege = [];
   for (const t of d.termine) {
-    eintraege.push({ min: calc.zeitZuMin(t.start), art: 'termin', titel: t.titel, sub: [t.ende ? `bis ${t.ende.slice(0, 5)}` : null, t.ort].filter(Boolean).join(' · '), zeit: t.start?.slice(0, 5) });
+    // geplantes Training grün, Therapie/Arzt/Kurs grau
+    const art = t.kategorie === 'training' ? 'training' : 'termin';
+    eintraege.push({ min: calc.zeitZuMin(t.start), art, titel: t.titel, sub: [t.ende ? `bis ${t.ende.slice(0, 5)}` : null, t.ort].filter(Boolean).join(' · '), zeit: t.start?.slice(0, 5) });
   }
   for (const t of d.trainings) {
     let min = null, zeit = null;
@@ -111,5 +114,11 @@ export async function render(el) {
   const rechts = h('div', { class: 'spalte' },
     h('div', { class: 'karte' }, h('h2', { class: 'klein-titel' }, 'Zeitleiste heute'), zeitleiste(d, starts)));
 
+  let tipp = null;
+  try { tipp = await freizeitTipp(); } catch { tipp = null; }
+  if (tipp) {
+    rechts.append(h('a', { href: '#/freizeit', class: 'karte fz-tipp' }, h('span', { html: icon('compass', 26) }),
+      h('span', { class: 'fz-kopf-text fz-spalte' }, h('span', { class: 'muted' }, 'Freizeit-Tipp'), h('strong', null, tipp.titel), tipp.text ? h('span', null, tipp.text) : null)));
+  }
   el.append(h('div', { class: 'seite heute' }, links, rechts));
 }

@@ -256,3 +256,22 @@ body:has(.pause-leiste:not([hidden])) #main { padding-bottom: calc(var(--nav-h) 
 .badge { font-size: 12px; padding: 2px 10px; border-radius: 999px; background: var(--card2); color: var(--muted); white-space: nowrap; }
 .badge.ok { background: var(--accent-dunkel); color: var(--accent); }
 .badge.akzent { border: 1px solid var(--accent); color: var(--accent); }
+
+/* Freizeit */
+.freizeit .fz-h2 { margin-bottom: 0; }
+.fz-karte { gap: 10px; }
+.fz-kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 56px; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.fz-kopf-text { flex: 1; min-width: 0; }
+.fz-spalte { display: flex; flex-direction: column; gap: 4px; }
+.fz-pfeil { color: var(--muted); transition: transform .15s; }
+.fz-kopf.offen .fz-pfeil { transform: rotate(180deg); }
+.fz-detail { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--linie); padding-top: 12px; }
+.fz-liste { margin: 0; padding-left: 20px; }
+.fz-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.fz-badges:empty { display: none; }
+.fz-link { display: inline-flex; align-items: center; min-height: 44px; color: var(--accent); font-weight: 650; text-decoration: underline; }
+.fz-inhalt { gap: 8px; }
+.fz-empf { border-color: var(--accent); }
+.fz-fuss { font-size: 14px; text-align: center; }
+.fz-tipp { flex-direction: row; align-items: center; gap: 14px; min-height: 56px; color: var(--accent); }
+.fz-tipp .fz-kopf-text { color: var(--text); }

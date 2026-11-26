@@ -7,14 +7,15 @@ import { slotStarts } from './ui/daten.js';
 import * as heute from './ui/heute.js';
 import * as checkliste from './ui/checkliste.js';
 import * as studio from './ui/studio.js';
+import * as freizeit from './ui/freizeit.js';
 import * as einstellungen from './ui/einstellungen.js';
 import * as login from './ui/login.js';
 import * as onboarding from './ui/onboarding.js';
 
-const ROUTEN = { heute, checkliste, studio, einstellungen };
+const ROUTEN = { heute, checkliste, studio, freizeit, einstellungen };
 const NAV = [
   ['heute', 'Heute', 'home'], ['checkliste', 'Checkliste', 'check'],
-  ['studio', 'Studio', 'dumbbell'], ['einstellungen', 'Einstellungen', 'gear'],
+  ['studio', 'Studio', 'dumbbell'], ['freizeit', 'Freizeit', 'compass'], ['einstellungen', 'Einstellungen', 'gear'],
 ];
 
 const main = document.getElementById('main');
@@ -38,7 +39,7 @@ async function startParameter() {
       } catch { /* Schritte sind nicht kritisch */ }
     }
   }
-  let ziel = location.hash && /^#\/(heute|checkliste|studio|einstellungen)/.test(location.hash) ? location.hash : '#/heute';
+  let ziel = location.hash && /^#\/(heute|checkliste|studio|freizeit|einstellungen)/.test(location.hash) ? location.hash : '#/heute';
   if (slot && calc.istSlot(slot)) ziel = `#/checkliste/${slot}`;
   history.replaceState(null, '', location.pathname + ziel);   // Query entfernt
 }
