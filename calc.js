@@ -111,7 +111,8 @@ export function schritteKcal(schritte, gewicht) {
  */
 export function gesamtumsatz({ bmr, aktiveKcal = null, schritte = 0, gewicht, trainings = [] }) {
   if (!bmr) return { wert: null, quelle: 'fehlt' };
-  if (aktiveKcal != null && aktiveKcal > 0) {
+  // Plausibilität: > 3.500 aktive kcal/Tag ist ein Messfehler (z. B. doppelt summiert) -> Schätzung verwenden
+  if (aktiveKcal != null && aktiveKcal > 0 && aktiveKcal <= 3500) {
     return { wert: runde(bmr + aktiveKcal * 0.8), quelle: 'watch' };
   }
   const tr = trainings.reduce((s, t) => s + trainingKcal(t.art, t.minuten, gewicht), 0);

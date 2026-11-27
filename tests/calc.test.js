@@ -7,6 +7,11 @@ const satz = (gewicht, wdh, rir = 1) => ({ typ: 'arbeit', gewicht, wdh, rir });
 const dt = (j, m, t, h = 0, min = 0) => new Date(j, m - 1, t, h, min);
 
 export default function (t) {
+  {
+    const g = C.gesamtumsatz({ bmr: 1700, aktiveKcal: 6400, schritte: 0, gewicht: 74 });
+    t.wahr(g.quelle === 'schaetzung' && g.wert < 3000, 'unplausible aktive kcal (6400) ignoriert');
+  }
+
   // ------------------------------------------------------------ Zahlen und Datum
   t.gruppe('Zahlen und Datum');
   t.gleich(C.zahl('87,9'), 87.9, 'zahl("87,9") = 87.9');
