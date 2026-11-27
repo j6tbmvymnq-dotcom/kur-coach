@@ -122,8 +122,9 @@ function readinessKurz(r) {
 export async function baueKurkontext() {
   const d = await ladeTag();
   const gestern = calc.addTage(d.datum, -1);
-  const [mzG, twG, trG] = await Promise.all([
+  const [mzG, twG, trG, tmM] = await Promise.all([
     db.byDatum('mahlzeiten', gestern), db.get('tageswerte', gestern), db.byDatum('trainings', gestern),
+    db.byDatum('termine', calc.addTage(d.datum, 1)),
   ]);
   const sg = calc.summeMahlzeiten(mzG);
   const sortiert = messungenAufsteigend(d.messungen);
@@ -152,7 +153,8 @@ export async function baueKurkontext() {
       gewichtVon: reihe[0]?.gewicht ?? null, gewichtBis: reihe.at(-1)?.gewicht ?? null,
       kfaVon: mitKfa[0]?.kfa ?? null, kfaBis: mitKfa.at(-1)?.kfa ?? null,
     },
-    plan: d.termine.map((t) => ({ start: t.start, titel: t.titel })),
+    plan: d.termine.map((t) => ({ id: t.id, start: t.start, titel: t.titel })),
+    planMorgen: tmM.sort((a, b) => (a.start || '').localeCompare(b.start || '')).map((t) => ({ id: t.id, start: t.start, titel: t.titel })),
     readiness: readinessKurz(d.readiness),
     hinweise,
   };

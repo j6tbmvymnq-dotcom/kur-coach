@@ -110,6 +110,11 @@ export default function (t) {
     const r = parseKurlog('{"loeschen": {"termine": ["a"]}}');
     t.wahr(r.ok !== false && normalisiere(r.daten).loeschen?.termine?.[0] === 'a', 'loeschen: ohne Kopfzeile erkannt');
   }
+  {
+    const kk = kurkontext({ tag: 3, kurTage: 21, datum: '2026-11-27', profil: {}, ziele: {}, plan: [{ id: '2026-11-27-1000-kraft', start: '10:00:00', titel: 'Kraft' }], planMorgen: [] });
+    t.wahr(kk.includes('plan_heute: 10:00 Kraft [2026-11-27-1000-kraft]'), 'kurkontext: Termin mit id und kurzer Zeit');
+    t.wahr(kk.includes('plan_morgen: –'), 'kurkontext: leerer plan_morgen');
+  }
   return uebernehmen(n, fakeDb).then(async anzahl => {
     t.gleich(anzahl, 7, 'uebernehmen gibt Anzahl zurück');
     t.wahr(log.some(l => l[0] === 'patch' && l[1] === 'tageswerte' && l[2] === '2026-11-29'), 'tageswerte per patch(datum)');

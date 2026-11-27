@@ -345,8 +345,13 @@ export function kurkontext(s = {}) {
   if (tr && [tr.gewichtVon, tr.gewichtBis, tr.kfaVon, tr.kfaBis].some(v => !fehlt(v))) {
     zeilen.push(`trend_7d: gewicht ${dez(tr.gewichtVon, 1)} → ${dez(tr.gewichtBis, 1)} kg (Ø) | kfa ${dez(tr.kfaVon, 1)} → ${dez(tr.kfaBis, 1)} % (Ø)`);
   }
-  const plan = Array.isArray(s.plan) ? s.plan.filter(x => x && (x.start || x.titel)) : [];
-  zeilen.push(`plan_heute: ${plan.length ? plan.map(x => `${txtOderStrich(x.start)} ${txtOderStrich(x.titel)}`).join(' | ') : '–'}`);
+  // Termine mit id in eckigen Klammern -> der Projekt-Chat kann sie per id ersetzen oder löschen
+  const planZeile = (liste) => {
+    const p = Array.isArray(liste) ? liste.filter(x => x && (x.start || x.titel)) : [];
+    return p.length ? p.map(x => `${fehlt(x.start) ? '–' : String(x.start).slice(0, 5)} ${txtOderStrich(x.titel)}${x.id ? ` [${x.id}]` : ''}`).join(' | ') : '–';
+  };
+  zeilen.push(`plan_heute: ${planZeile(s.plan)}`);
+  if (s.planMorgen !== undefined) zeilen.push(`plan_morgen: ${planZeile(s.planMorgen)}`);
   if (!fehlt(s.readiness)) {
     const r = typeof s.readiness === 'object' ? [s.readiness.ampel, s.readiness.text].filter(x => !fehlt(x)).join(' – ') : s.readiness;
     if (r) zeilen.push(`readiness: ${r}`);
