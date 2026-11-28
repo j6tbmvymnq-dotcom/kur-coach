@@ -5,7 +5,7 @@ import { icon } from './icons.js';
 import { sheet, bestaetigen, feld, zahlInput } from './sheet.js';
 import { h, toast, zf1, zfEingabe, fehlerText } from './util.js';
 import { ladeReadiness } from './daten.js';
-import { startPause, stoppe, timerWiederherstellen, wakeLockAn, wakeLockAus } from './studio-timer.js';
+import { startPause, stoppe, timerWiederherstellen, wakeLockAn, wakeLockAus, entsperreAudio, piep } from './studio-timer.js';
 
 const KATEGORIEN = { beine: 'Beine', ruecken: 'Rücken', brust: 'Brust', schulter: 'Schulter', arme: 'Arme', rumpf: 'Rumpf', cardio: 'Cardio' };
 const TECHNIK_HINWEIS = 'Erstes Mal: leichter Technik-Satz. Danach Satz für Satz um 5–10 % steigern (Isolation 2,5–5 %), bis 8–12 Wdh. mit 1–2 Wdh. Reserve gehen – ab diesem Gewicht zählen die Arbeitssätze.';
@@ -60,6 +60,35 @@ export async function zeigeSession(S, training) {
       if (pause) startPause(pause);
       zeichne();
     } catch (e) { toast('Satz nicht gespeichert: ' + fehlerText(e)); }
+  }
+
+  // Zeit-Übung: Vorlauf + Countdown, danach Satz über den normalen Erledigt-Weg speichern
+  function startCountdown(row, d, dr) {
+    const dauer = Math.round(calc.zahl(dr.wdh) || 0);
+    if (dauer <= 0) { toast('Bitte zuerst die Sekunden eingeben.'); return; }
+    entsperreAudio(); wakeLockAn();
+    const start = Date.now();
+    const titel = h('div', { class: 'pause-label' }, 'Bereit');
+    const zeit = h('div', { class: 'pause-zeit countdown-zeit', role: 'timer' }, '3');
+    let tick = null;
+    const ende = () => { clearInterval(tick); overlay.remove(); };
+    const abbrechen = () => {
+      const p = gym.zeitPhase(start, dauer, Date.now());
+      ende();
+      if (p.gehalten > 0) { dr.wdh = p.gehalten; zeichne(); }
+    };
+    const overlay = h('div', { class: 'countdown-overlay', role: 'dialog', 'aria-label': 'Countdown' },
+      titel, zeit, h('button', { type: 'button', class: 'btn', onclick: abbrechen }, 'Abbrechen'));
+    const aktual = () => {
+      const p = gym.zeitPhase(start, dauer, Date.now());
+      if (p.phase === 'fertig') { ende(); piep(); dr.wdh = p.gehalten; haken(row, d, dr); return; }
+      if (p.phase === 'lauf' && titel.textContent !== 'Halten') piep(); // Startsignal nach dem Vorlauf
+      titel.textContent = p.phase === 'vorlauf' ? 'Bereit' : 'Halten';
+      zeit.textContent = String(p.rest);
+    };
+    document.body.append(overlay);
+    aktual();
+    tick = setInterval(aktual, 200);
   }
 
   function satzBearbeiten(s, u) {
@@ -215,6 +244,7 @@ export async function zeigeSession(S, training) {
       (cardio || ohne) ? null : stepper('Gewicht (kg)', dr.gewicht, aend('gewicht', schritt, 0)),
       stepper(cardio ? 'Minuten' : u.einheit === 's' ? 'Sekunden' : 'Wiederholungen', dr.wdh, aend('wdh', wSchritt, 0), { ganz: true }),
       (cardio || row.typ !== 'arbeit') ? null : rir,
+      (u.einheit === 's' && !cardio && row.typ === 'arbeit') ? h('button', { type: 'button', class: 'btn haken-btn', onclick: () => startCountdown(row, d, dr) }, h('span', { html: icon('play', 36) }), ' Start') : null,
       h('button', { type: 'button', class: 'btn primaer haken-btn', 'aria-label': 'Satz erledigt', onclick: () => haken(row, d, dr) },
         h('span', { html: icon('check', 36) }), ' Erledigt'));
   }

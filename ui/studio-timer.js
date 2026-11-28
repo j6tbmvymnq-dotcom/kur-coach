@@ -15,7 +15,7 @@ export function entsperreAudio() {
 }
 document.addEventListener('pointerdown', entsperreAudio, { capture: true, passive: true });
 
-function piep() {
+export function piep() {
   try {
     entsperreAudio();
     if (ctx) {

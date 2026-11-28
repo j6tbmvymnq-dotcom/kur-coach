@@ -152,6 +152,9 @@ export function vorschlagFuer(uebung, einheiten, readiness = null, vorlagenSaetz
   }
   if (ohneGewicht(uebung)) {
     v.gewicht = 0;
+    if (!hatHistorie) v.grund = uebung.einheit === 's'
+      ? `Erstes Mal: ${v.wdhMin}–${v.wdhMax} s sauber halten, mit 1–2 s Reserve.`
+      : `Erstes Mal: ${v.wdhMin}–${v.wdhMax} saubere Wdh.`;
     if (hatHistorie) v.grund = v.grund.replace(/ → \+[\d,]+ kg/, ' → mehr Wdh./Zeit steigern');
   }
   return v;
@@ -318,4 +321,13 @@ export function bestwerteListe(hist, katalogMap) {
     out.push({ id, name: u.name, best: Math.max(...verlauf.map((v) => v.e1rm)), verlauf, zuletzt: gruppen[0].zeit });
   }
   return out.sort((a, b) => b.zuletzt - a.zuletzt);
+}
+
+/** Zeit-Übung: Phase und Restzeit aus Startzeitpunkt, Dauer (s) und jetzt (ms). Vorlauf in s. */
+export function zeitPhase(start, dauer, jetzt, vorlauf = 3) {
+  const el = (jetzt - start) / 1000;
+  if (el < vorlauf) return { phase: 'vorlauf', rest: Math.max(1, Math.ceil(vorlauf - el)), gehalten: 0 };
+  const lauf = el - vorlauf;
+  if (lauf >= dauer) return { phase: 'fertig', rest: 0, gehalten: dauer };
+  return { phase: 'lauf', rest: Math.ceil(dauer - lauf), gehalten: Math.floor(lauf) };
 }

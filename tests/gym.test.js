@@ -1,5 +1,5 @@
 import { mergeKatalog, ueberschreibung, baueHistorie, historie, aufwaermModus, planAus, zeilen, vorschlagFuer,
-  laufendesTraining, startTraining, beendeTraining, speichereSatz, zusammenfassung, trainingsText, bestwerteListe } from '../gym.js';
+  laufendesTraining, startTraining, beendeTraining, speichereSatz, zusammenfassung, trainingsText, bestwerteListe, zeitPhase } from '../gym.js';
 
 function fakeDb(start = {}) {
   const t = { uebungen: [], trainings: [], saetze: [], ...start };
@@ -123,4 +123,9 @@ export default async function (t) {
   const bw = bestwerteListe(baueHistorie(ss, trs), km);
   t.gleich(bw.find((b) => b.id === 'a').verlauf.map((v) => v.datum), ['2026-11-20', '2026-11-22', '2026-11-23'], 'Bestwerte-Verlauf älteste zuerst');
   t.gleich(bw.find((b) => b.id === 'a').best, 139.3, 'bester e1RM');
+  t.gruppe('Gym: Zeit-Countdown');
+  t.gleich([zeitPhase(1000, 30, 1000).phase, zeitPhase(1000, 30, 1000).rest], ['vorlauf', 3], 'Vorlauf startet bei 3');
+  t.gleich([zeitPhase(0, 30, 3000).phase, zeitPhase(0, 30, 3000).rest], ['lauf', 30], 'Lauf beginnt nach dem Vorlauf');
+  t.gleich(zeitPhase(0, 30, 3000 + 12500), { phase: 'lauf', rest: 18, gehalten: 12 }, 'Restzeit aufgerundet, gehalten abgerundet');
+  t.gleich(zeitPhase(0, 30, 40000), { phase: 'fertig', rest: 0, gehalten: 30 }, 'fertig nach Ablauf (auch bei Drift)');
 }
